@@ -41,9 +41,3 @@ import { WorkspaceModule } from './workspace/workspace.module';
 })
 export class AppModule { }
 
-// standevcode
-// Lvtz6gPI8DKcd1m0
-// sNbeRPv0Gt3aIHZ6
-//mongodb://127.0.0.1/peersync
-// mongodb+srv://kingstanley:Nj12063@cluster0.6noj5.mongodb.net/chatserviceDB?retryWrites=true&w=majority
-//mongodb+srv://peer_user:sNbeRPv0Gt3aIHZ6@cluster0.vrx0p3m.mongodb.net/peersync?retryWrites=true&w=majority
