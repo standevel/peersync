@@ -47,6 +47,9 @@ export class AccountService {
             throw error;
         }
     }
+    async verifiyEmail(token: string) {
+        const user = await this.userModel.findOne({ email_token: token });
+    }
 
     async signIn(signinDto: SignInDto) {
         // console.log('signIn dto: ', signinDto);
