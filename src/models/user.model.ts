@@ -24,8 +24,9 @@ export class User {
     @Prop({ type: [Types.ObjectId], ref: 'Workspace' })
     workspaces: Types.ObjectId[];
     @Prop() phone: string;
-    @Prop() phone_is_verified: boolean;
-    @Prop() email_is_verified: boolean;
+    @Prop() isPhoneVerified?: boolean;
+    @Prop() isEmailVerified?: boolean;
+    @Prop() emailVerificationToken: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

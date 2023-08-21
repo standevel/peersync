@@ -19,4 +19,11 @@ export class UserService {
         );
         console.log('update Res: ', upRes);
     }
+    async verifyUser(token: string): Promise<UserDto | null> {
+        return (await this.userModel.findOne({ emailVerificationToken: token }))?.toJSON();
+    }
+
+    async updateUserVerificationStatus(userId: string): Promise<void> {
+        await this.userModel.updateOne({ _id: userId }, { isEmailVerified: true }).exec();
+    }
 }

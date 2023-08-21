@@ -24,18 +24,23 @@ export class AccountService {
     ) { } async getAllUsers() {
         return await this.userModel.find();
     }
+    genToken() {
+        const token = Math.random().toString(32).replace('.', '');
+        return token;
+    }
     async signUp(createUserDto: UserDto) {
         try {
             console.log('user data: ', createUserDto);
+
             await this.emailExist(createUserDto.email);
             const hash = await bcrypt.hash(createUserDto.password, 10);
-
+            const token = this.genToken();
             const user = (
-                await this.userModel.create({ ...createUserDto, password: hash })
+                await this.userModel.create({ ...createUserDto, emailVerificationToken: token, password: hash })
             ).toJSON();
             if (user) {
-                const code = Math.random().toString(32);
-                const link = 'http://localhost:3000/api/v1/verify-email/' + code.replace('.', '');
+
+                const link = 'http://localhost:3000/api/v1/account/verify-email/' + token;
                 this.notificationService.sendEmaiVerification(user.email, user.name, link);
                 return await this.signIn({
                     email: createUserDto.email,

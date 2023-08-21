@@ -13,8 +13,11 @@ export class UserDto {
     @IsOptional() @IsString() avatar?: string;
     @IsOptional() @IsArray() workspaces?: string[];
     @IsOptional() @IsString() phone?: string;
-    @IsOptional() @IsBoolean() phone_is_verified?: boolean;
-    @IsOptional() @IsBoolean() email_is_verified?: boolean;
+    @IsOptional() @IsBoolean() isPhoneVerified?: boolean;
+    @IsOptional() @IsBoolean() isEmailVerified?: boolean;
+    @IsString()
+    @IsOptional() emailVerificationToken: string;
     @IsArray()
     @IsOptional() id?: string;
+
 }
