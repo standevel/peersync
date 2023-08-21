@@ -1,12 +1,14 @@
+/* eslint-disable prettier/prettier */
 /*
 https://docs.nestjs.com/controllers#controllers
 */
 
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { CompanyService } from './company.service';
 import { GetUser } from 'src/decorators/get-user.decorator';
 import { UserDto } from 'src/dto';
 import { CompanyDto } from 'src/dto/company.dto';
+import { CompanyService } from './company.service';
+import { Public } from 'src/is_public';
 
 @Controller('company')
 export class CompanyController {
@@ -16,9 +18,9 @@ export class CompanyController {
         return this.companyService.getMyCompany(user);
     }
 
+    @Public()
     @Post()
-    createCompany(@Body() company: CompanyDto, @GetUser() user: UserDto) {
-        company.createdBy = user.id;
+    createCompany(@Body() company: CompanyDto) {
         return this.companyService.createCompany(company);
     }
 }

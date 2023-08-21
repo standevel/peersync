@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
     BadRequestException,
     ConflictException,
@@ -8,19 +9,22 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
-import { SignInDto } from 'src/dto';
+import { SignInDto, UserDto } from 'src/dto';
 import { IUser, User } from 'src/models';
+import { NotificationService } from '../../notification/services/notification.service';
 
 @Injectable()
 export class AccountService {
-    async getAllUsers() {
+
+
+    constructor(
+        private notificationService: NotificationService,
+        @InjectModel(User.name) private readonly userModel: Model<UserDto>,
+        private jwtService: JwtService,
+    ) { } async getAllUsers() {
         return await this.userModel.find();
     }
-    constructor(
-        @InjectModel(User.name) private readonly userModel: Model<IUser>,
-        private jwtService: JwtService,
-    ) { }
-    async signUp(createUserDto: IUser) {
+    async signUp(createUserDto: UserDto) {
         try {
             console.log('user data: ', createUserDto);
             await this.emailExist(createUserDto.email);
@@ -30,6 +34,9 @@ export class AccountService {
                 await this.userModel.create({ ...createUserDto, password: hash })
             ).toJSON();
             if (user) {
+                const code = Math.random().toString(32);
+                const link = 'http://localhost:3000/api/v1/verify-email/' + code.replace('.', '');
+                this.notificationService.sendEmaiVerification(user.email, user.name, link);
                 return await this.signIn({
                     email: createUserDto.email,
                     password: createUserDto.password,
@@ -42,16 +49,16 @@ export class AccountService {
     }
 
     async signIn(signinDto: SignInDto) {
-        console.log('signIn dto: ', signinDto);
+        // console.log('signIn dto: ', signinDto);
         const found = (
             await this.userModel.findOne({ email: signinDto.email })
         ).toJSON();
-        console.log('found: ', found);
+        // console.log('found: ', found);
         if (!found) throw new UnauthorizedException('Invalid email or password');
         const isMatch = bcrypt.compareSync(signinDto.password, found.password);
         if (!isMatch) throw new UnauthorizedException('Invalid email or password!');
 
-        console.log('found user: ', found);
+        console.log('found user: ', found._id);
         // usr name and password is valid
         const { password, ...payload } = found;
         return {
@@ -59,7 +66,9 @@ export class AccountService {
             user: payload,
         };
     }
-
+    async findUserByEmail(email: string) {
+        return (await this.userModel.findOne({ email }))?.toJSON();
+    }
     async emailExist(email: string) {
         if (!email) {
             throw new BadRequestException('Email is required');

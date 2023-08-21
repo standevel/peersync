@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { WorkspaceController } from './controllers/workspace.controller';
 import { WorkspaceService } from './services/workspace.service';
 /*
@@ -10,10 +11,11 @@ import { CompanyModule } from 'src/company/company.module';
 import { Team, TeamSchema, Workspace, WorkspaceSchema } from 'src/models';
 import { TeamController } from './controllers/team.controller';
 import { TeamService } from './services/team.service';
+import { AccountModule } from 'src/account/account.module';
 
 @Module({
     imports: [
-        CompanyModule,
+        CompanyModule, AccountModule,
         MongooseModule.forFeature([
             { name: Workspace.name, schema: WorkspaceSchema },
             { name: Team.name, schema: TeamSchema },

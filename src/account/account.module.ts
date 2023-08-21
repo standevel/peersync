@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
@@ -9,25 +10,29 @@ import { AccountController } from './controllers/account.controller';
 import { JwtAuthGuard } from './jwt.guard';
 import { AccountService } from './services/account.service';
 import { JwtStrategy } from './services/jwt.strategy';
+import { UserService } from './services/user.service';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
     imports: [
-        MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+        MongooseModule.forFeature([{ name: User.name, schema: UserSchema },]),
         JwtModule.register({
             secret: jwtConstants.secret,
             signOptions: { expiresIn: jwtConstants.expiresIn },
         }),
         PassportModule,
+        NotificationModule
     ],
     controllers: [AccountController],
     providers: [
         AccountService,
+        UserService,
         JwtStrategy,
         {
             provide: APP_GUARD,
             useClass: JwtAuthGuard,
         },
     ],
-    exports: [AccountService, JwtStrategy],
+    exports: [AccountService, UserService, JwtStrategy],
 })
 export class AccountModule { }

@@ -1,4 +1,6 @@
+/* eslint-disable prettier/prettier */
 import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
+import { Types } from 'mongoose';
 
 export class CreateWorkspaceDto {
     @IsArray()
@@ -7,6 +9,6 @@ export class CreateWorkspaceDto {
     @IsString() workspace: string;
     @IsBoolean()
     @IsOptional() isCompany: boolean;
-    @IsString() @IsOptional() companyName: string;
-    @IsString() @IsOptional() companyEmail: string;
+    @IsString()
+    @IsOptional() companyId: Types.ObjectId | string;
 }

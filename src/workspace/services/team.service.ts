@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /*
 https://docs.nestjs.com/providers#services
 */

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types, Document } from 'mongoose';
 
@@ -15,7 +16,7 @@ export interface IUser {
 export type UserDocument = HydratedDocument<User>;
 
 @Schema({ timestamps: true })
-export class User extends Document {
+export class User {
     @Prop() name: string;
     @Prop({ unique: true }) email: string;
     @Prop() password: string;

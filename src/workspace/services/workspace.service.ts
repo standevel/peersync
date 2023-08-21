@@ -1,10 +1,12 @@
+/* eslint-disable prettier/prettier */
 /*
 https://docs.nestjs.com/providers#services
 */
 
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
+import { UserService } from 'src/account/services/user.service';
 import { CompanyService } from 'src/company/company.service';
 import { CreateWorkspaceDto, TeamDto, UserDto, WorkspaceDto } from 'src/dto';
 import { CompanyDto } from 'src/dto/company.dto';
@@ -18,31 +20,38 @@ export class WorkspaceService {
         private readonly workspaceModel: Model<WorkspaceDto>,
         private teamService: TeamService,
         private companyService: CompanyService,
+        private userService: UserService
     ) { }
     async createWorkspace(createDto: CreateWorkspaceDto, user: UserDto) {
         try {
             let workspace;
-            if (createDto.isCompany) {
-                const company = new CompanyDto(
-                    createDto.companyName,
-                    '',
-                    createDto.companyEmail,
-                    user,
-                );
-                const savedCompany = await this.companyService.createCompany(company);
-                workspace = await this.workspaceModel.create({
-                    name: createDto.workspace,
-                    createdBy: user,
-                    companyId: savedCompany.id,
-                });
-                workspace = workspace.toJSON();
-            } else {
-                workspace = await this.workspaceModel.create({
-                    name: createDto.workspace,
-                    createdBy: user,
-                });
-                workspace = workspace.toJSON();
-            }
+            // if (createDto.isCompany) {
+            //     const company = new CompanyDto(
+            //         createDto.companyName,
+            //         '',
+            //         createDto.companyEmail,
+            //         user,
+            //     );
+            // const savedCompany = await this.companyService.createCompany(company);
+            // workspace = await this.workspaceModel.create({
+            //         name: createDto.workspace,
+            //         createdBy: new Types.ObjectId(user.id),
+            //         companyId: savedCompany.id,
+            //     });
+            //     workspace = workspace.toJSON();
+
+            //     this.userService.addWorkspaceToUser(user.id, workspace.id);
+            //     this.addUserToWorkspace(user.id, workspace.id);
+            // } else {
+            workspace = await this.workspaceModel.create({
+                name: createDto.workspace,
+                createdBy: new Types.ObjectId(user.id),
+                companyId: createDto.isCompany ? new Types.ObjectId(createDto.companyId) : null
+            });
+            workspace = workspace.toJSON();
+            this.userService.addWorkspaceToUser(user.id, new Types.ObjectId(workspace.id));
+            this.addUserToWorkspace(new Types.ObjectId(user.id), workspace.id);
+            // }
             console.log('workspace: ', workspace);
             const teams: TeamDto[] = createDto.teams.map((team: any) => {
                 const teamDto = new TeamDto();
@@ -61,5 +70,12 @@ export class WorkspaceService {
             console.log('Error: ', error.message);
             throw error;
         }
+    }
+
+    async addUserToWorkspace(userId: Types.ObjectId | string, workspaceId: Types.ObjectId | string) {
+        await this.workspaceModel.updateOne(
+            { _id: workspaceId },
+            { $push: { users: userId } },
+        );
     }
 }
