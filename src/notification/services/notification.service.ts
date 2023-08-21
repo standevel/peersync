@@ -7,7 +7,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import * as handlebars from 'handlebars';
-import { join } from 'node:path';
+import { join } from 'path';
 
 
 
