@@ -42,7 +42,7 @@ export class AccountService {
             ).toJSON();
             if (user) {
 
-                const link = this.configService.get('BASE_URI') + '/account/verify-email/' + token;
+                const link = this.configService.get('BASE_URI') + 'account/verify-email/' + token;
                 console.log('verification link: ', link);
 
                 this.notificationService.sendEmaiVerification(user.email, user.name, link);
