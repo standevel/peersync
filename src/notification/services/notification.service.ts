@@ -18,7 +18,7 @@ export class NotificationService {
         const subject = 'Account Verification';
         console.log('verificationLink: ', verificationLink);
         // Load and compile the Handlebars template
-        const templatePath = join(__dirname, '../templates/account-verification.hbs');
+        const templatePath = join(__dirname, 'templates/account-verification.hbs');
         const templateSource = fs.readFileSync(templatePath, 'utf-8');
         const template = handlebars.compile(templateSource);
 
