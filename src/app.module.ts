@@ -1,3 +1,4 @@
+import { ChannelModule } from './channel/channel.module';
 /* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -13,22 +14,23 @@ import { MessageModule } from './message/message.module';
 import { NotificationModule } from './notification/notification.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 @Module({
-  imports: [ConfigModule.forRoot({
-    isGlobal: true,
-    load: [config],
-  }),
+  imports: [
+    ChannelModule, ConfigModule.forRoot({
+      isGlobal: true,
+      load: [config],
+    }),
     NotificationModule,
     CompanyModule,
     WorkspaceModule,
     AccountModule,
     MessageModule,
-  MongooseModule.forRootAsync({
-    imports: [ConfigModule],
-    useFactory: async (configService: ConfigService) => ({
-      uri: configService.get<string>('MONGODB_URI'),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI'),
+      }),
+      inject: [ConfigService],
     }),
-    inject: [ConfigService],
-  }),
   ],
   controllers: [AppController],
   providers: [

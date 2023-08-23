@@ -2,6 +2,7 @@
 import { IsEmail, IsOptional, IsString } from 'class-validator';
 import { BaseDto } from './base.dto';
 import { UserDto } from './user.dto';
+import { PartialType } from '@nestjs/mapped-types';
 
 export class CompanyDto extends BaseDto {
     @IsString() companyName: string;
@@ -32,3 +33,6 @@ export class CompanyDto extends BaseDto {
         this.password = password;
     }
 }
+
+
+export class UpdateCompanyDto extends PartialType(CompanyDto) { }

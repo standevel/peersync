@@ -7,9 +7,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { UserService } from 'src/account/services/user.service';
-import { CompanyService } from 'src/company/company.service';
+import { ChannelService } from 'src/channel/services/channel.service';
 import { CreateWorkspaceDto, TeamDto, UserDto, WorkspaceDto } from 'src/dto';
-import { CompanyDto } from 'src/dto/company.dto';
 import { Workspace } from 'src/models';
 import { TeamService } from './team.service';
 
@@ -19,8 +18,8 @@ export class WorkspaceService {
         @InjectModel(Workspace.name)
         private readonly workspaceModel: Model<WorkspaceDto>,
         private teamService: TeamService,
-        private companyService: CompanyService,
-        private userService: UserService
+        private channelService: ChannelService,
+        private userService: UserService,
     ) { }
     async createWorkspace(createDto: CreateWorkspaceDto, user: UserDto) {
         try {
@@ -49,6 +48,9 @@ export class WorkspaceService {
                 companyId: createDto.isCompany ? new Types.ObjectId(createDto.companyId) : null
             });
             workspace = workspace.toJSON();
+
+            // create default general channel for the workspace
+            await this.channelService.createChannel({ name: 'General Channel', description: 'general channel for everyone in the workspace', createdBy: user, workspaceId: workspace.id }, user);
             this.userService.addWorkspaceToUser(user.id, new Types.ObjectId(workspace.id));
             this.addUserToWorkspace(new Types.ObjectId(user.id), workspace.id);
             // }
@@ -63,6 +65,12 @@ export class WorkspaceService {
             const savedTeams = await this.teamService.batchCreateTeam(teams, user);
             for (let i = 0; i < savedTeams.length; i++) {
                 workspace.teams.push(savedTeams[i]['id']);
+                this.channelService.createChannel({
+                    name: 'General Channel',
+                    description: 'general channel for everyone in the team',
+                    createdBy: user,
+                    workspaceId: workspace.id, teamId: savedTeams[i]
+                }, user);
             }
             await this.workspaceModel.updateOne({ _id: workspace.id }, workspace);
             return workspace;

@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+import { PartialType } from '@nestjs/mapped-types';
 import {
     IsArray,
     IsBoolean,
@@ -21,3 +22,5 @@ export class UserDto {
     @IsOptional() id?: string;
 
 }
+
+export class UpdateUserDto extends PartialType(UserDto) { }

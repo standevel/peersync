@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { BaseModel } from './base.model';
@@ -18,10 +19,9 @@ export class Company extends BaseModel {
 }
 export const CompanySchema = SchemaFactory.createForClass(Company);
 CompanySchema.set('toJSON', {
-    // virtuals: true
     transform: (doc, ret) => {
         ret.id = ret._id;
         delete ret._id;
     },
 });
-CompanySchema.index({ email: 1 }, { unique: true })
+CompanySchema.index({ email: 1 }, { unique: true });

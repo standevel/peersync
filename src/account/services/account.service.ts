@@ -5,12 +5,13 @@ import {
     Injectable,
     UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
 import { SignInDto, UserDto } from 'src/dto';
-import { IUser, User } from 'src/models';
+import { User } from 'src/models';
 import { NotificationService } from '../../notification/services/notification.service';
 
 @Injectable()
@@ -21,6 +22,7 @@ export class AccountService {
         private notificationService: NotificationService,
         @InjectModel(User.name) private readonly userModel: Model<UserDto>,
         private jwtService: JwtService,
+        private configService: ConfigService
     ) { } async getAllUsers() {
         return await this.userModel.find();
     }
@@ -40,8 +42,11 @@ export class AccountService {
             ).toJSON();
             if (user) {
 
-                const link = 'http://localhost:3000/api/v1/account/verify-email/' + token;
+                const link = this.configService.get('BASE_URI') + '/account/verify-email/' + token;
+                console.log('verification link: ', link);
+
                 this.notificationService.sendEmaiVerification(user.email, user.name, link);
+
                 return await this.signIn({
                     email: createUserDto.email,
                     password: createUserDto.password,
