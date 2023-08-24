@@ -8,6 +8,7 @@ export interface IUser {
     password: string;
     avatar: string;
     workspaces: string[];
+    roles: string[];
     phone: string;
     phone_is_verified: string;
     email_is_verified: string;
@@ -24,6 +25,7 @@ export class User {
     @Prop({ type: [Types.ObjectId], ref: 'Workspace' })
     workspaces: Types.ObjectId[];
     @Prop() phone: string;
+    @Prop() roles: string[];
     @Prop() isPhoneVerified?: boolean;
     @Prop() isEmailVerified?: boolean;
     @Prop() emailVerificationToken: string;

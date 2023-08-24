@@ -1,11 +1,19 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AppModule } from './app.module';
-
 import * as bodyParser from 'body-parser';
+import { AppModule } from './app.module';
+import { join } from 'path';
+
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule); // Specify NestExpressApplication type
+  app.useStaticAssets('public'); // Optional: Serve static assets from 'public' directory
+
+  app.useStaticAssets(join(__dirname, '..', 'public'));
+  app.setBaseViewsDir(join(__dirname, '..', 'views'));
+  app.setViewEngine('hbs');
+
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
@@ -22,4 +30,4 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
   await app.listen(process.env.PORT ? parseInt(process.env.PORT) : 3000);
 }
-bootstrap(); 
+bootstrap();

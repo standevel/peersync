@@ -45,12 +45,13 @@ export class WorkspaceService {
             workspace = await this.workspaceModel.create({
                 name: createDto.workspace,
                 createdBy: new Types.ObjectId(user.id),
+                // users: [new Types.ObjectId(user.id)],
                 companyId: createDto.isCompany ? new Types.ObjectId(createDto.companyId) : null
             });
             workspace = workspace.toJSON();
 
             // create default general channel for the workspace
-            await this.channelService.createChannel({ name: 'General Channel', description: 'general channel for everyone in the workspace', createdBy: user, workspaceId: workspace.id }, user);
+            await this.channelService.createChannel({ name: 'General Channel', description: 'general channel for everyone in the workspace', createdBy: user.id, workspaceId: workspace.id }, user);
             this.userService.addWorkspaceToUser(user.id, new Types.ObjectId(workspace.id));
             this.addUserToWorkspace(new Types.ObjectId(user.id), workspace.id);
             // }
@@ -68,7 +69,7 @@ export class WorkspaceService {
                 this.channelService.createChannel({
                     name: 'General Channel',
                     description: 'general channel for everyone in the team',
-                    createdBy: user,
+                    createdBy: user.id,
                     workspaceId: workspace.id, teamId: savedTeams[i]
                 }, user);
             }
@@ -81,6 +82,7 @@ export class WorkspaceService {
     }
 
     async addUserToWorkspace(userId: Types.ObjectId | string, workspaceId: Types.ObjectId | string) {
+        console.log('adding user to workspace: ', userId, workspaceId);
         await this.workspaceModel.updateOne(
             { _id: workspaceId },
             { $push: { users: userId } },

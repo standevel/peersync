@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+    </style>
+    <script>
+        setTimeout(function () {
+            const redirectUrl = "{{ redirectUrl }}"; // Get the redirect URL from the data passed
+            window.location.href = redirectUrl; // Perform the redirect
+        }, 10000); // 10000 milliseconds = 10 seconds
+        let couter = 0;
+
+        const interval = setInterval(() => {
+            couter++;
+            document.getElementById('timer').innerText = couter;
+            if (couter == 10) {
+                clearInterval(interval);
+            }
+        }, 1000)
+    </script>
+</head>
+
+
+<body>
+    {{#if status}}
+    <h1>Welcome {{name}}</h1>
+    <p>Your email verification was successful.</p>
+    <p>We are redirecting you in 10 seconds to login page</p>
+
+
+    {{else}}
+    <h1>Invalid token</h1>
+    {{/if}}
+</body>
+
+</html>

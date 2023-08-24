@@ -22,7 +22,7 @@ export class CompanyDto extends BaseDto {
         companyName: string,
         address: string,
         email: string,
-        createdBy: UserDto | string,
+        createdBy: string,
         password: string
     ) {
         super();

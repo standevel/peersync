@@ -26,7 +26,7 @@ export class ChannelService {
     }
     async createChannel(channel: ChannelDto, user: UserDto) {
         try {
-            if (!channel.createdBy) channel.createdBy = user;
+            if (!channel.createdBy) channel.createdBy = user.id;
 
             return await this.channelModel.create(channel);
         } catch (error) {

@@ -1,6 +1,6 @@
 import { ChannelModule } from './channel/channel.module';
 /* eslint-disable prettier/prettier */
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -11,6 +11,7 @@ import { AppService } from './app.service';
 import { CompanyModule } from './company/company.module';
 import config from './config/config';
 import { MessageModule } from './message/message.module';
+import { RbacMiddleware } from './middlewares/rbac.middleware';
 import { NotificationModule } from './notification/notification.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 @Module({
@@ -41,5 +42,17 @@ import { WorkspaceModule } from './workspace/workspace.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer
+  //     .apply(RbacMiddleware)
+  //     .forRoutes(
+  //       { path: 'workspace', method: RequestMethod.POST },
+  //       { path: 'team', method: RequestMethod.POST },
+  //       { path: 'channel', method: RequestMethod.POST },
+  //       { path: 'message', method: RequestMethod.POST },
+  //       // Define similar role requirements for other routes
+  //     );
+  // }
+}
 

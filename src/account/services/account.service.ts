@@ -11,6 +11,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
 import { SignInDto, UserDto } from 'src/dto';
+import { UserRole } from 'src/enum/user-roles.enum';
 import { User } from 'src/models';
 import { NotificationService } from '../../notification/services/notification.service';
 
@@ -38,7 +39,7 @@ export class AccountService {
             const hash = await bcrypt.hash(createUserDto.password, 10);
             const token = this.genToken();
             const user = (
-                await this.userModel.create({ ...createUserDto, emailVerificationToken: token, password: hash })
+                await this.userModel.create({ ...createUserDto, roles: [UserRole.COMPANY_ADMIN], emailVerificationToken: token, password: hash })
             ).toJSON();
             if (user) {
 
@@ -65,7 +66,7 @@ export class AccountService {
         // console.log('signIn dto: ', signinDto);
         const found = (
             await this.userModel.findOne({ email: signinDto.email })
-        ).toJSON();
+        )?.toJSON();
         // console.log('found: ', found);
         if (!found) throw new UnauthorizedException('Invalid email or password');
         const isMatch = bcrypt.compareSync(signinDto.password, found.password);
