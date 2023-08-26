@@ -1,6 +1,5 @@
 /* eslint-disable prettier/prettier */
 import { PartialType } from '@nestjs/mapped-types';
-import { Roles } from '../decorators/roles.decorator';
 import {
     IsArray,
     IsBoolean,
@@ -9,7 +8,10 @@ import {
     IsString,
 } from 'class-validator';
 export class UserDto {
-    @IsString() name: string;
+    @IsString()
+    @IsOptional() name: string;
+    @IsString() firstName: string;
+    @IsString() lastName: string;
     @IsEmail() email: string;
     @IsString() password: string;
     @IsOptional()

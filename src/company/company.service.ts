@@ -33,6 +33,7 @@ export class CompanyService {
         } else {
             const token = this.accountService.genToken();
             const result = await this.accountService.signUp({
+                firstName: companyDto.companyName, lastName: companyDto.companyName,
                 email: companyDto.email, roles: [UserRole.COMPANY_ADMIN], password: companyDto.password, name: companyDto.companyName, emailVerificationToken: token
             });
             companyDto.createdBy = result.user['id'].toString() ?? result.user['_id'].toString();

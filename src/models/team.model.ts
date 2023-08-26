@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { BaseModel } from './base.model';
 import { Types } from 'mongoose';
@@ -6,7 +7,8 @@ import { Types } from 'mongoose';
 export class Team extends BaseModel {
     @Prop() name: string;
     @Prop() description: string;
-    @Prop({ type: Types.ObjectId, ref: 'Workspace' }) workspaceId: string
+    @Prop({ type: Types.ObjectId, ref: 'Workspace' }) workspaceId: string;
+    @Prop({ type: [Types.ObjectId], ref: 'User' }) members: string[];
 }
 
 export const TeamSchema = SchemaFactory.createForClass(Team);
