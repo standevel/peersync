@@ -26,7 +26,8 @@ export class UserDto {
     @IsBoolean() isEmailVerified?: boolean;
     @IsString()
     @IsOptional() emailVerificationToken: string;
-    @IsArray() roles: string[];
+    @IsArray()
+    @IsOptional() roles: string[];
     @IsString()
     @IsOptional() id?: string;
 
