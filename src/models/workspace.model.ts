@@ -11,7 +11,7 @@ export class Workspace extends BaseModel {
     @Prop() description: string;
     @Prop({ type: [Types.ObjectId], ref: 'Team' }) teams: Types.ObjectId[];
     @Prop({ type: Types.ObjectId, ref: 'Company' }) companyId: Types.ObjectId;
-    @Prop({ type: [Types.ObjectId], ref: 'User' }) users: Types.ObjectId[];
+    @Prop({ type: [Types.ObjectId], ref: 'User' }) members: Types.ObjectId[];
 }
 export const WorkspaceSchema = SchemaFactory.createForClass(Workspace);
 WorkspaceSchema.set('toJSON', {

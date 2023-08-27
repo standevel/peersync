@@ -64,9 +64,16 @@ export class AccountService {
 
     async signIn(signinDto: SignInDto) {
         // console.log('signIn dto: ', signinDto);
-        const found = (
-            await this.userModel.findOne({ email: signinDto.email })
-        )?.toJSON();
+        const found =
+            (await (await this.userModel.findOne({ email: signinDto.email })).populate([
+                {
+                    path: 'workspaces', model: 'Workspace',
+                    populate: {
+                        path: 'teams', model: "Team",
+                        populate: { path: 'members', model: 'User' }
+                    }
+                }]))?.toJSON();
+
         // console.log('found: ', found);
         if (!found) throw new UnauthorizedException('Invalid email or password');
         const isMatch = bcrypt.compareSync(signinDto.password, found.password);
@@ -74,10 +81,10 @@ export class AccountService {
 
         console.log('found user: ', found._id);
         // usr name and password is valid
-        const { password, ...payload } = found;
+        const { workspaces, password, ...payload } = found;
         return {
             access_token: this.jwtService.sign(payload),
-            user: payload,
+            user: { ...payload, workspaces },
         };
     }
     async findUserByEmail(email: string) {
