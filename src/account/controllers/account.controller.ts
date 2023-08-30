@@ -41,23 +41,27 @@ export class AccountController {
     async verifyUser(@Param('token') token: string, @Res() res: Response): Promise<{ status: boolean, name: string; redirectUrl: string; }> {
         const user = await this.userService.verifyUser(token);
         console.log('token: ', token, 'user: ', user);
-        // if (!user) {
-        //     return 'User not found';
-        // }
 
-        // if (user.isEmailVerified) {
-        // res.render('email_verification', { status: user.isEmailVerified,name:user.name });
-        // }
         if (user) {
-
             await this.userService.updateUserVerificationStatus(user.id);
 
             return { status: user.isEmailVerified, name: user.name, redirectUrl: 'https://workspace-hrsn.onrender.com/#/login' };
         } else {
-
-            // await this.userService.updateUserVerificationStatus(user.id);
-
             return { status: false, name: '', redirectUrl: '' };
         }
+    }
+
+    @Public()
+    @Render('accept_invite')
+    @Get('accept-invite')
+    acceptInvite(@Query('invite_token') token: string) {
+        console.log(' token: ', token);
+        return this.accountService.acceptInvite(token);
+    }
+
+    @Public()
+    @Get('reject-invite')
+    rejectInvite(@Query('invite_token') token: string) {
+        console.log(' token: ', token);
     }
 }

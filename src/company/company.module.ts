@@ -9,10 +9,11 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AccountModule } from 'src/account/account.module';
 import { Company, CompanySchema } from 'src/models';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
     imports: [
-        AccountModule,
+        AccountModule, NotificationModule,
         MongooseModule.forFeature([{ name: Company.name, schema: CompanySchema }]),
     ],
     controllers: [CompanyController],

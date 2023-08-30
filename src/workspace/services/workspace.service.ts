@@ -11,16 +11,24 @@ import { ChannelService } from 'src/channel/services/channel.service';
 import { CreateWorkspaceDto, TeamDto, UserDto, WorkspaceDto } from 'src/dto';
 import { Workspace } from 'src/models';
 import { TeamService } from './team.service';
+import { NotificationService } from '../../notification/services/notification.service';
 
 @Injectable()
 export class WorkspaceService {
+
     constructor(
         @InjectModel(Workspace.name)
         private readonly workspaceModel: Model<WorkspaceDto>,
         private teamService: TeamService,
         private channelService: ChannelService,
         private userService: UserService,
+        private notificationService: NotificationService
     ) { }
+    async InviteTeammate(teammates: string[], user: UserDto, workspace: string, workspaceId: string) {
+
+        const name = user.firstName ? user.firstName + " " + user.lastName : user.name;
+        return this.notificationService.sendInvitationEmail(teammates, workspace, name, workspaceId);
+    }
     async createWorkspace(createDto: CreateWorkspaceDto, user: UserDto) {
         try {
             let workspace;

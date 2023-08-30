@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 export * from './company.model';
 export * from './user.model';
 export * from './channel.model';
@@ -11,3 +12,4 @@ export * from './plugin.model';
 export * from './team.model';
 export * from './file.model';
 export * from './extension_market_place.model';
+export * from './invitation.model';

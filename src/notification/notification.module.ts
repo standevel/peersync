@@ -8,7 +8,11 @@ https://docs.nestjs.com/modules
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 import { join } from 'path';
+import { Invitation, InvitationSchema } from 'src/models/invitation.model';
+import { TokenGeneratorService } from './services/token_generator.service';
+import { InvitationService } from './services/invitation.service';
 
 
 @Module({
@@ -32,12 +36,16 @@ import { join } from 'path';
                 },
             },
         }
-    }),],
-    controllers: [
-        NotificationController,],
+    }),
+    MongooseModule.forFeature([{ name: Invitation.name, schema: InvitationSchema }])
+    ],
+    controllers: [NotificationController,],
     providers: [
-        NotificationService,],
-    exports: [NotificationService]
+        NotificationService,
+        TokenGeneratorService,
+        InvitationService
+    ],
+    exports: [NotificationService, TokenGeneratorService, InvitationService]
 })
 export class NotificationModule { }
 // Njs123456@,

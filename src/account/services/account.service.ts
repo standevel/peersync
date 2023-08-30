@@ -3,7 +3,7 @@ import {
     BadRequestException,
     ConflictException,
     Injectable,
-    UnauthorizedException,
+    UnauthorizedException
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -13,23 +13,41 @@ import { Model } from 'mongoose';
 import { SignInDto, UserDto } from 'src/dto';
 import { UserRole } from 'src/enum/user-roles.enum';
 import { User } from 'src/models';
+import { InvitationService } from 'src/notification/services/invitation.service';
 import { NotificationService } from '../../notification/services/notification.service';
+import { TokenGeneratorService } from '../../notification/services/token_generator.service';
 
 @Injectable()
 export class AccountService {
+
 
 
     constructor(
         private notificationService: NotificationService,
         @InjectModel(User.name) private readonly userModel: Model<UserDto>,
         private jwtService: JwtService,
-        private configService: ConfigService
+        private configService: ConfigService,
+        private tokenGeneratorService: TokenGeneratorService,
+        private invitationService: InvitationService
     ) { } async getAllUsers() {
         return await this.userModel.find();
     }
-    genToken() {
-        const token = Math.random().toString(32).replace('.', '');
-        return token;
+    async acceptInvite(token: string) {
+        if (!token) throw new BadRequestException('Token must be provided');
+        const invite = await this.invitationService.findByToken(token);
+        if (!invite) throw new BadRequestException('Invalid token');
+        let user = await this.userModel.findOne({ email: invite.email });
+        if (user) {
+            user.workspaces.push(invite.workspaceId);
+            await user.save();
+            this.invitationService.deleteByToken(token);
+            return { id: user.id, email: user.email, };
+        }
+        else {
+            user = await this.userModel.create({ email: invite.email, password: 'Welcome123', workspaces: [invite.workspaceId], emailVerificationToken: invite.token, isEmailVerified: true, roles: ['user'], });
+            this.invitationService.deleteByToken(token);
+            return { id: user.id, email: user.email, };
+        }
     }
     async signUp(createUserDto: UserDto) {
         try {
@@ -37,13 +55,13 @@ export class AccountService {
 
             await this.emailExist(createUserDto.email);
             const hash = await bcrypt.hash(createUserDto.password, 10);
-            const token = this.genToken();
+            const token = this.tokenGeneratorService.genToken();
             const user = (
                 await this.userModel.create({ ...createUserDto, roles: [UserRole.COMPANY_ADMIN], emailVerificationToken: token, password: hash })
             ).toJSON();
             if (user) {
 
-                const link = this.configService.get('BASE_URI') + 'account/verify-email/' + token;
+                const link = this.configService.get('BASE_BE_URI') + 'account/verify-email/' + token;
                 console.log('verification link: ', link);
 
                 this.notificationService.sendEmaiVerification(user.email, user.name, link);

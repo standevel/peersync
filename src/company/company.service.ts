@@ -11,13 +11,17 @@ import { UserDto } from 'src/dto';
 import { CompanyDto } from 'src/dto/company.dto';
 import { UserRole } from 'src/enum/user-roles.enum';
 import { Company } from 'src/models';
+import { TokenGeneratorService } from '../notification/services/token_generator.service';
 
 @Injectable()
 export class CompanyService {
 
     constructor(
         private accountService: AccountService,
-        @InjectModel(Company.name) private readonly companyModel: Model<CompanyDto>) { }
+        private tokenGeneratorService: TokenGeneratorService,
+        @InjectModel(Company.name) private readonly companyModel: Model<CompanyDto>,
+
+    ) { }
 
     async createCompany(companyDto: CompanyDto) {
         const found = await this.companyModel.findOne({ email: companyDto.email });
@@ -31,7 +35,7 @@ export class CompanyService {
             const saved = await this.companyModel.create(companyDto);
             return { ...res, company: saved.toJSON() };
         } else {
-            const token = this.accountService.genToken();
+            const token = this.tokenGeneratorService.genToken();
             const result = await this.accountService.signUp({
                 firstName: companyDto.companyName, lastName: companyDto.companyName,
                 email: companyDto.email, roles: [UserRole.COMPANY_ADMIN], password: companyDto.password, name: companyDto.companyName, emailVerificationToken: token
