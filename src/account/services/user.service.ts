@@ -6,11 +6,14 @@ https://docs.nestjs.com/providers#services
 import { Injectable, Type } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { UserDto } from 'src/dto';
+import { UpdateUserDto, UserDto } from 'src/dto';
 import { User } from 'src/models';
 
 @Injectable()
 export class UserService {
+    acceptSuccess(personalData: UpdateUserDto) {
+        throw new Error('Method not implemented.');
+    }
     constructor(@InjectModel(User.name) private userModel: Model<UserDto>) { }
     async addWorkspaceToUser(userId: Types.ObjectId | string, workspaceId: Types.ObjectId | string) {
         const upRes = await this.userModel.updateOne(

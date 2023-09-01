@@ -3,9 +3,9 @@
 https://docs.nestjs.com/controllers#controllers
 */
 
-import { Body, Controller, Get, Param, Post, Query, Render, Res } from '@nestjs/common';
-import { Response } from 'express';
-import { SignInDto, UserDto } from 'src/dto';
+import { Body, Controller, Get, Param, Patch, Post, Query, Render, Res } from '@nestjs/common';
+import { Response, response } from 'express';
+import { SignInDto, UpdateUserDto, UserDto } from 'src/dto';
 import { Public } from 'src/is_public';
 import { AccountService } from '../services/account.service';
 import { UserService } from '../services/user.service';
@@ -63,5 +63,14 @@ export class AccountController {
     @Get('reject-invite')
     rejectInvite(@Query('invite_token') token: string) {
         console.log(' token: ', token);
+    }
+
+    @Public()
+    @Post('accept-success/:token')
+    acceptSuccess(@Body() personalData: UpdateUserDto, @Param('token') token: string,) {
+        console.log('update data: ', personalData, token);
+        // const response = await 
+        return this.accountService.acceptSuccess(token, personalData);
+        // console.log('respose: ', response);
     }
 }

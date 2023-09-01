@@ -14,6 +14,7 @@ import { SignInDto, UserDto } from 'src/dto';
 import { UserRole } from 'src/enum/user-roles.enum';
 import { User } from 'src/models';
 import { InvitationService } from 'src/notification/services/invitation.service';
+import { UpdateUserDto } from '../../dto/user.dto';
 import { NotificationService } from '../../notification/services/notification.service';
 import { TokenGeneratorService } from '../../notification/services/token_generator.service';
 
@@ -36,28 +37,43 @@ export class AccountService {
         if (!token) throw new BadRequestException('Token must be provided');
         const invite = await this.invitationService.findByToken(token);
         if (!invite) throw new BadRequestException('Invalid token');
-        let user = await this.userModel.findOne({ email: invite.email });
-        if (user) {
-            user.workspaces.push(invite.workspaceId);
-            await user.save();
-            this.invitationService.deleteByToken(token);
-            return { id: user.id, email: user.email, };
+        return { token: token, email: invite.email, workspaceId: invite.workspaceId, link: this.configService.get('BASE_BE_URI') + 'account/accept-success/' + token };
+    }
+    async acceptSuccess(token: string, userData: UpdateUserDto) {
+        try {
+            const invite = await this.invitationService.findByToken(token);
+            const loginUri = this.configService.get('BASE_FE_URI') + '#/login';
+            console.log('login Url: ', loginUri);
+            let user = await this.userModel.findOne({ email: userData.email });
+            if (user) {
+                user.workspaces.push(invite.workspaceId);
+                // await user.updateOne();
+                this.invitationService.deleteByToken(token);
+                return { id: user.id, email: user.email, loginUri: loginUri };
+            }
+            else {
+                console.log('creating user');
+                user = await this.userModel.create({ email: invite.email, password: await this.hassPassword(userData.password), workspaces: [invite.workspaceId], emailVerificationToken: invite.token, isEmailVerified: true, roles: ['user'], });
+                // this.invitationService.deleteByToken(token);
+                return { id: user.id, email: user.email, loginUri };
+            }
+        } catch (error) {
+            console.log('error: ', error);
+            throw error;
         }
-        else {
-            user = await this.userModel.create({ email: invite.email, password: 'Welcome123', workspaces: [invite.workspaceId], emailVerificationToken: invite.token, isEmailVerified: true, roles: ['user'], });
-            this.invitationService.deleteByToken(token);
-            return { id: user.id, email: user.email, };
-        }
+    }
+    async hassPassword(password: string) {
+        return await bcrypt.hash(password, 10);
     }
     async signUp(createUserDto: UserDto) {
         try {
             console.log('user data: ', createUserDto);
 
             await this.emailExist(createUserDto.email);
-            const hash = await bcrypt.hash(createUserDto.password, 10);
+
             const token = this.tokenGeneratorService.genToken();
             const user = (
-                await this.userModel.create({ ...createUserDto, roles: [UserRole.COMPANY_ADMIN], emailVerificationToken: token, password: hash })
+                await this.userModel.create({ ...createUserDto, roles: [UserRole.COMPANY_ADMIN], emailVerificationToken: token, password: await this.hassPassword(createUserDto.password) })
             ).toJSON();
             if (user) {
 

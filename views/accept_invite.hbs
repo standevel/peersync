@@ -71,7 +71,16 @@
         }
 
         .message {
+
+            margin: 10px;
+        }
+
+        .error {
             color: red;
+        }
+
+        .success {
+            color: green;
         }
 
         @keyframes spin {
@@ -91,7 +100,11 @@
         <div class="title">
             <h2>Account Set up</h2>
         </div>
-        <form>
+        <form id="form">
+            <div class="form-group">
+                <label for="first-name">Email:</label>
+                <input type="text" id="email" name="email" required value="{{email}}" readonly>
+            </div>
             <div class="form-group">
                 <label for="first-name">First Name:</label>
                 <input type="text" id="first-name" name="first-name" required>
@@ -108,19 +121,26 @@
                 <label for="password">Password:</label>
                 <input type="password" id="password" name="password" required>
             </div>
-            <div class="message"></div>
+            <div class="message" id="message"></div>
             <div class="submit-button-container">
-                <button id="submit-button" type="submit" class="submit-button">
+                <button id="submit-button" type="button" class="submit-button">
                     <span id="button-text">Submit</span>
                     <div class="spinner" id="spinner"></div>
                 </button>
 
             </div>
+
         </form>
     </div>
     <script>
+        const token = "{{token}}";
+        const link = "{{link}}";
+        const email = "{{email}}";
+
         document.getElementById('submit-button').addEventListener('click', async function () {
             try {
+                document.getElementById('email').value = email;
+                console.log('submitting form with token: ',);
                 // Disable the submit button
                 document.getElementById('submit-button').disabled = true;
                 document.getElementById('button-text').style.display = 'none';
@@ -144,32 +164,47 @@
                 };
 
                 // Define the PATCH endpoint URL
-                var endpoint = 'http://localhost:3000/api/v1/account/accept-success/0vi6opdb3cso'; // Replace with your actual endpoint URL
+                //var endpoint = 'http://localhost:3000/api/v1/account/accept-success'; // Replace with your actual endpoint URL
 
                 // Send a PATCH request using the Fetch API
-                const response = await fetch(endpoint, {
+                //`http://localhost:3000/api/v1/account/accept-success/${token}`
+                const response = await fetch(link, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json', // Specify the content type as JSON
+                        'Content-Type': 'application/json',// Specify the content type as JSON
                     },
                     body: JSON.stringify(formData) // Convert the form data to JSON
                 });
-
+                console.log('response: ', response);
                 if (response.ok) {
+                    console.log('response  is ok');
+                    const body = await response.json();
+                    console.log('response body: ', body, response.ok, response.status);
                     // Handle a successful response here
-                    console.log('PATCH request was successful.');
+                    console.log('PATCH request was successful. ', response.body);
                     document.getElementById('submit-button').disabled = false;
                     document.getElementById('spinner').style.display = 'none';
                     document.getElementById('button-text').style.display = 'inline-block';
                     document.getElementById('message').innerHTML = `Your account has been set up successfully! We are redirecting you to login page`;
+                    document.getElementById('message').classList.add('success');
 
+                    const loginUri = body.loginUri;
+
+                    console.log(token, loginUri);
+                    console.log(" redirectUrl ", loginUri);
+
+                    setTimeout(() => {
+
+                        window.location.href = loginUri;
+                    }, 5000);
                 } else {
                     // Handle errors here
-                    console.error('PATCH request failed.');
+                    console.error('Accunt setup failed.');
                     document.getElementById('submit-button').disabled = false;
                     document.getElementById('spinner').style.display = 'none';
                     document.getElementById('button-text').style.display = 'inline-block';
                     document.getElementById('message').innerHTML = `Account set up failed! Please try again`;
+                    document.getElementById('message').classList.add('error');
                 }
             } catch (error) {
                 // Handle network errors here
