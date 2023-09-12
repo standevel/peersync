@@ -12,6 +12,7 @@ export class Workspace extends BaseModel {
     @Prop({ type: [Types.ObjectId], ref: 'Team' }) teams: Types.ObjectId[];
     @Prop({ type: Types.ObjectId, ref: 'Company' }) companyId: Types.ObjectId;
     @Prop({ type: [Types.ObjectId], ref: 'User' }) members: Types.ObjectId[];
+    @Prop() logoUrl: string;
 }
 export const WorkspaceSchema = SchemaFactory.createForClass(Workspace);
 WorkspaceSchema.set('toJSON', {

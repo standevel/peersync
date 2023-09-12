@@ -3,7 +3,7 @@
 https://docs.nestjs.com/controllers#controllers
 */
 
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { GetUser } from 'src/decorators/get-user.decorator';
 import { UserDto } from 'src/dto';
 import { TeamDto } from 'src/dto/team.dto';
@@ -20,5 +20,9 @@ export class TeamController {
     @Post('create-many')
     batchCreate(@Body() teams: TeamDto[], @GetUser() user: UserDto) {
         return this.teamService.batchCreateTeam(teams, user);
+    }
+    @Get('user-teams')
+    getUserTeams(@GetUser() user: UserDto) {
+        return this.teamService.getUserTeams(user);
     }
 }

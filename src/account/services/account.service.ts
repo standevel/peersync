@@ -33,6 +33,8 @@ export class AccountService {
     ) { } async getAllUsers() {
         return await this.userModel.find();
     }
+   
+
     async acceptInvite(token: string) {
         if (!token) throw new BadRequestException('Token must be provided');
         const invite = await this.invitationService.findByToken(token);

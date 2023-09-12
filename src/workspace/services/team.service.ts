@@ -30,4 +30,10 @@ export class TeamService {
         const saved = await this.teamModel.create(toSave);
         return saved;
     }
+    async getUserTeams(user: UserDto) {
+        console.log('getting user teams');
+        const userTeams = await this.teamModel.find({ members: user.id });
+        // .populate(['channels']);
+        return userTeams;
+    }
 }

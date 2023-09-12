@@ -9,6 +9,7 @@ import { SignInDto, UpdateUserDto, UserDto } from 'src/dto';
 import { Public } from 'src/is_public';
 import { AccountService } from '../services/account.service';
 import { UserService } from '../services/user.service';
+import { GetUser } from 'src/decorators/get-user.decorator';
 
 @Controller('account')
 export class AccountController {
@@ -73,4 +74,5 @@ export class AccountController {
         return this.accountService.acceptSuccess(token, personalData);
         // console.log('respose: ', response);
     }
+
 }

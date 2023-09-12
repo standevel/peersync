@@ -19,6 +19,7 @@ export class Channel extends BaseModel {
     @Prop({ type: Types.ObjectId, ref: "Workspace" }) workspaceId: Types.ObjectId;
     @Prop() description: string;
     @Prop({ type: Types.ObjectId, ref: "Team" }) teamId: Types.ObjectId;
+    @Prop({ type: [Types.ObjectId], ref: 'User' }) members: string[];
 }
 
 export const ChannelSchema = SchemaFactory.createForClass(Channel);

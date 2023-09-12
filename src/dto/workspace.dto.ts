@@ -14,5 +14,9 @@ export class WorkspaceDto {
     @IsOptional() companyId: string;
     @IsString() createdBy: string;
     @IsOptional() id?: string;
+
+    @IsString()
+    @IsOptional()
+    logoUrl: string;
 }
 export class UpdateWorkspaceDto extends PartialType(WorkspaceDto) { }
