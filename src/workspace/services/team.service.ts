@@ -30,9 +30,9 @@ export class TeamService {
         const saved = await this.teamModel.create(toSave);
         return saved;
     }
-    async getUserTeams(user: UserDto) {
+    async getUserTeams(user: UserDto, workspaceId: string) {
         console.log('getting user teams');
-        const userTeams = await this.teamModel.find({ members: user.id });
+        const userTeams = await this.teamModel.find({ workspaceId: worksapceId, members: user.id });
         // .populate(['channels']);
         return userTeams;
     }
