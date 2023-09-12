@@ -32,7 +32,7 @@ export class TeamService {
     }
     async getUserTeams(user: UserDto, workspaceId: string) {
         console.log('getting user teams');
-        const userTeams = await this.teamModel.find({ workspaceId: worksapceId, members: user.id });
+        const userTeams = await this.teamModel.find({ workspaceId: workspaceId, members: user.id });
         // .populate(['channels']);
         return userTeams;
     }
