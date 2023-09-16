@@ -9,6 +9,7 @@ export class Team extends BaseModel {
     @Prop() description: string;
     @Prop({ type: Types.ObjectId, ref: 'Workspace' }) workspaceId: string;
     @Prop({ type: [Types.ObjectId], ref: 'User' }) members: string[];
+    @Prop({ type: [Types.ObjectId], ref: 'Channel' }) channels: string[];
 }
 
 export const TeamSchema = SchemaFactory.createForClass(Team);

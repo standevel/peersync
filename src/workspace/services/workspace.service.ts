@@ -51,7 +51,7 @@ export class WorkspaceService {
             //     this.addUserToWorkspace(user.id, workspace.id);
             // } else {
             workspace = await this.workspaceModel.create({
-                name: createDto.workspace,
+                name: createDto.name,
                 createdBy: new Types.ObjectId(user.id),
                 // users: [new Types.ObjectId(user.id)],
                 companyId: createDto.isCompany ? new Types.ObjectId(createDto.companyId) : null

@@ -6,7 +6,7 @@ export class CreateWorkspaceDto {
     @IsArray()
     @IsOptional()
     teams: string[];
-    @IsString() workspace: string;
+    @IsString() name: string;
     @IsBoolean()
     @IsOptional() isCompany: boolean;
     @IsString()

@@ -10,6 +10,8 @@ export class TeamDto extends BaseDto {
     @IsString() workspaceId: WorkspaceDto | string;
     @IsString() id?: string;
     @IsArray()
+    @IsOptional() channels: string[];
+    @IsArray()
     @IsOptional() members: string[];
 }
 

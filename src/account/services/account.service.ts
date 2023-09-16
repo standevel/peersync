@@ -33,7 +33,7 @@ export class AccountService {
     ) { } async getAllUsers() {
         return await this.userModel.find();
     }
-   
+
 
     async acceptInvite(token: string) {
         if (!token) throw new BadRequestException('Token must be provided');
@@ -100,16 +100,23 @@ export class AccountService {
 
     async signIn(signinDto: SignInDto) {
         // console.log('signIn dto: ', signinDto);
-        const found =
-            (await (await this.userModel.findOne({ email: signinDto.email })).populate([
-                {
-                    path: 'workspaces', model: 'Workspace',
+        let found =
+            await this.userModel.findOne({ email: signinDto.email }).populate({
+                path: 'workspaces',
+                populate: {
+                    path: 'teams',
                     populate: {
-                        path: 'teams', model: "Team",
-                        populate: { path: 'members', model: 'User' }
+                        path: 'channels'
                     }
-                }]))?.toJSON();
-
+                }
+            })
+                .populate({
+                    path: 'workspaces',
+                    populate: {
+                        path: 'members'
+                    }
+                });
+        found = found.toJSON();
         // console.log('found: ', found);
         if (!found) throw new UnauthorizedException('Invalid email or password');
         const isMatch = bcrypt.compareSync(signinDto.password, found.password);
