@@ -12,9 +12,13 @@ import { Team } from 'src/models';
 
 @Injectable()
 export class TeamService {
+
     constructor(
         @InjectModel(Team.name) private readonly teamModel: Model<TeamDto>,
     ) { }
+    async addChannelToTeam(teamId: string | TeamDto, channelId: string) {
+        return await this.teamModel.updateOne({ _id: teamId }, { $push: { channels: channelId } });
+    }
     async createTeam(team: TeamDto, user: UserDto) {
         if (!team) throw new BadRequestException('Team is required');
         team.createdBy = user.id;

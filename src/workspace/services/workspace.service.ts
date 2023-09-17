@@ -7,11 +7,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { UserService } from 'src/account/services/user.service';
-import { ChannelService } from 'src/channel/services/channel.service';
 import { CreateWorkspaceDto, TeamDto, UserDto, WorkspaceDto } from 'src/dto';
 import { Workspace } from 'src/models';
-import { TeamService } from './team.service';
+import { ChannelService } from 'src/workspace/services/channel.service';
 import { NotificationService } from '../../notification/services/notification.service';
+import { TeamService } from './team.service';
 
 @Injectable()
 export class WorkspaceService {

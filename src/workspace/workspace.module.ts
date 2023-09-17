@@ -8,24 +8,25 @@ https://docs.nestjs.com/modules
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AccountModule } from 'src/account/account.module';
-import { ChannelModule } from 'src/channel/channel.module';
 import { CompanyModule } from 'src/company/company.module';
-import { Team, TeamSchema, Workspace, WorkspaceSchema } from 'src/models';
+import { Channel, ChannelSchema, Team, TeamSchema, Workspace, WorkspaceSchema } from 'src/models';
 import { NotificationModule } from 'src/notification/notification.module';
 import { TeamController } from './controllers/team.controller';
 import { TeamService } from './services/team.service';
+import { ChannelController } from './controllers/channel.controller';
+import { ChannelService } from './services/channel.service';
 
 @Module({
     imports: [
         CompanyModule, AccountModule,
-        ChannelModule,
         NotificationModule,
         MongooseModule.forFeature([
             { name: Workspace.name, schema: WorkspaceSchema },
             { name: Team.name, schema: TeamSchema },
+            { name: Channel.name, schema: ChannelSchema },
         ]),
     ],
-    controllers: [WorkspaceController, TeamController],
-    providers: [WorkspaceService, TeamService],
+    controllers: [WorkspaceController, TeamController, ChannelController],
+    providers: [WorkspaceService, TeamService, ChannelService],
 })
 export class WorkspaceModule { }

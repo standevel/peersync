@@ -1,4 +1,4 @@
-import { ChannelModule } from './channel/channel.module';
+
 /* eslint-disable prettier/prettier */
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -16,7 +16,7 @@ import { NotificationModule } from './notification/notification.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 @Module({
   imports: [
-    ChannelModule, ConfigModule.forRoot({
+    ConfigModule.forRoot({
       isGlobal: true,
       load: [config],
     }),
