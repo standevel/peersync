@@ -21,7 +21,7 @@ export class InvitationService {
         return await this.invitationModel.create(invitation);
     }
     async saveInvites(invitations: InvitationDto[]) {
-        // console.log('invitations: ', invitations);
+        console.log('invitations: ', invitations);
 
         const saved = await this.invitationModel.create({ ...invitations });
         console.log(' saved: ', saved);

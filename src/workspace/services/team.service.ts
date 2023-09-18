@@ -22,6 +22,7 @@ export class TeamService {
     async createTeam(team: TeamDto, user: UserDto) {
         if (!team) throw new BadRequestException('Team is required');
         team.createdBy = user.id;
+        team.members = [user.id];
         return await this.teamModel.create(team);
     }
     async batchCreateTeam(teams: TeamDto[], user: UserDto): Promise<TeamDto[]> {
@@ -29,7 +30,7 @@ export class TeamService {
             throw new BadRequestException('Expects an array of teams');
         }
         const toSave = teams.map((team) => {
-            return { ...team, createdBy: user.id };
+            return { ...team, createdBy: user.id, members: [user.id] };
         });
         const saved = await this.teamModel.create(toSave);
         return saved;

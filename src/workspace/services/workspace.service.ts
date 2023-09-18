@@ -53,6 +53,7 @@ export class WorkspaceService {
             workspace = await this.workspaceModel.create({
                 name: createDto.name,
                 createdBy: new Types.ObjectId(user.id),
+                members: [user.id],
                 // users: [new Types.ObjectId(user.id)],
                 companyId: createDto.isCompany ? new Types.ObjectId(createDto.companyId) : null
             });
@@ -69,6 +70,7 @@ export class WorkspaceService {
                 teamDto.createdBy = user.id;
                 teamDto.name = team;
                 teamDto.workspaceId = workspace.id;
+                // teamDto.members = [user.id];
                 return teamDto;
             });
             const savedTeams = await this.teamService.batchCreateTeam(teams, user);
@@ -78,7 +80,8 @@ export class WorkspaceService {
                     name: 'General Channel',
                     description: 'general channel for everyone in the team',
                     createdBy: user.id,
-                    workspaceId: workspace.id, teamId: savedTeams[i]
+                    workspaceId: workspace.id, teamId: savedTeams[i],
+                    members: [user.id]
                 }, user);
             }
             await this.workspaceModel.updateOne({ _id: workspace.id }, workspace);
