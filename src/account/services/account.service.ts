@@ -140,6 +140,11 @@ export class AccountService {
                         match: { members: userId }, // Filter channels where the user is a member
                     },
                 },
+            }).populate({
+                path: 'workspaces',
+                populate: {
+                    path: 'members'
+                }
             });
 
     }
