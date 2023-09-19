@@ -119,7 +119,7 @@ export class AccountService {
 
         console.log('found user: ', found._id);
         // usr name and password is valid
-        const userWithWorkspace = await this.getUserWithWorkspaces(found.id);
+        const userWithWorkspace = (await this.getUserWithWorkspaces(found.id)).toJSON();
         console.log('user with workspaces: ', userWithWorkspace);
         const { workspaces, password, ...payload } = userWithWorkspace;
         return {

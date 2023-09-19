@@ -7,3 +7,4 @@ export default () => ({
     APP_NAME: 'Peer Sync',
     EMAIL: 'account@easylabsltd.com'
 });
+// 'mongodb+srv://peer_user:sNbeRPv0Gt3aIHZ6@cluster0.vrx0p3m.mongodb.net/peersync?retryWrites=true&w=majority',

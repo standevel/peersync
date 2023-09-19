@@ -40,7 +40,7 @@ export class CompanyService {
                 firstName: companyDto.companyName, lastName: companyDto.companyName,
                 email: companyDto.email, roles: [UserRole.COMPANY_ADMIN], password: companyDto.password, name: companyDto.companyName, emailVerificationToken: token
             });
-            companyDto.createdBy = result.user['id'].toString() ?? result.user['_id'].toString();
+            companyDto.createdBy = result.user['id']?.toString() ?? result.user['_id']?.toString();
             const saved = await this.companyModel.create(companyDto);
             return { ...result, company: saved.toJSON() };
         }
