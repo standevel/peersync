@@ -100,35 +100,48 @@ export class AccountService {
 
     async signIn(signinDto: SignInDto) {
         // console.log('signIn dto: ', signinDto);
-        let found =
-            await this.userModel.findOne({ email: signinDto.email }).populate({
-                path: 'workspaces',
-                populate: {
-                    path: 'teams',
-                    populate: {
-                        path: 'channels'
-                    }
-                }
-            })
-                .populate({
-                    path: 'workspaces',
-                    populate: {
-                        path: 'members'
-                    }
-                });
-        found = found.toJSON();
-        // console.log('found: ', found);
+        const found =
+            (await this.userModel.findOne({ email: signinDto.email }))?.toJSON();
+
+        // .populate([
+        //     {
+        //         path: 'workspaces', model: 'Workspace',
+        //         populate: {
+        //             path: 'teams', model: "Team",
+        //             populate: { path: 'members', model: 'User' }
+        //         }
+        //     }]))?.toJSON();
+
+        console.log('found: ', found);
         if (!found) throw new UnauthorizedException('Invalid email or password');
         const isMatch = bcrypt.compareSync(signinDto.password, found.password);
         if (!isMatch) throw new UnauthorizedException('Invalid email or password!');
 
         console.log('found user: ', found._id);
         // usr name and password is valid
-        const { workspaces, password, ...payload } = found;
+        const userWithWorkspace = await this.getUserWithWorkspaces(found.id);
+        console.log('user with workspaces: ', userWithWorkspace);
+        const { workspaces, password, ...payload } = userWithWorkspace;
         return {
             access_token: this.jwtService.sign(payload),
             user: { ...payload, workspaces },
         };
+    }
+    async getUserWithWorkspaces(userId: string) {
+        return await this.userModel
+            .findById(userId)
+            .populate({
+                path: 'workspaces',
+                populate: {
+                    path: 'teams',
+                    match: { members: userId }, // Filter teams where the user is a member
+                    populate: {
+                        path: 'channels',
+                        match: { members: userId }, // Filter channels where the user is a member
+                    },
+                },
+            });
+
     }
     async findUserByEmail(email: string) {
         return (await this.userModel.findOne({ email }))?.toJSON();
