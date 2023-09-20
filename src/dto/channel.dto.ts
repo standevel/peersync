@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { PartialType } from '@nestjs/mapped-types';
-import { IsArray, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
 import { BaseDto } from './base.dto';
 import { TeamDto } from './team.dto';
 
@@ -12,7 +12,8 @@ export class ChannelDto extends BaseDto {
     @IsOptional() teamId?: string | TeamDto;
     @IsString()
     @IsOptional() id?: string;
-
+    @IsOptional()
+    @IsBoolean() is_public?: boolean;
     @IsArray()
     @IsOptional()
     members?: string[];

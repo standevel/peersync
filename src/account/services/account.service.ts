@@ -11,8 +11,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
 import { SignInDto, UserDto } from 'src/dto';
+import { ChannelDto } from 'src/dto/channel.dto';
 import { UserRole } from 'src/enum/user-roles.enum';
-import { User } from 'src/models';
+import { Channel, User } from 'src/models';
 import { InvitationService } from 'src/notification/services/invitation.service';
 import { UpdateUserDto } from '../../dto/user.dto';
 import { NotificationService } from '../../notification/services/notification.service';
@@ -26,14 +27,24 @@ export class AccountService {
     constructor(
         private notificationService: NotificationService,
         @InjectModel(User.name) private readonly userModel: Model<UserDto>,
+        @InjectModel(Channel.name) private readonly channelModel: Model<ChannelDto>,
         private jwtService: JwtService,
         private configService: ConfigService,
         private tokenGeneratorService: TokenGeneratorService,
-        private invitationService: InvitationService
+        private invitationService: InvitationService,
+        // private channelService:ChannelService
     ) { } async getAllUsers() {
         return await this.userModel.find();
     }
 
+    async getPublicChannelsInWorkspace(workspaceId: string) {
+        console.log('workspaceId ', workspaceId.toString());
+        const channels = await this.channelModel.find(
+            { "workspaceId": workspaceId, "teamId": null }
+        );
+        // console.log('found channels:', channels);
+        return channels;
+    }
 
     async acceptInvite(token: string) {
         if (!token) throw new BadRequestException('Token must be provided');
@@ -41,6 +52,7 @@ export class AccountService {
         if (!invite) throw new BadRequestException('Invalid token');
         return { token: token, email: invite.email, workspaceId: invite.workspaceId, link: this.configService.get('BASE_BE_URI') + 'account/accept-success/' + token };
     }
+
     async acceptSuccess(token: string, userData: UpdateUserDto) {
         try {
             const invite = await this.invitationService.findByToken(token);
@@ -103,14 +115,7 @@ export class AccountService {
         const found =
             (await this.userModel.findOne({ email: signinDto.email }))?.toJSON();
 
-        // .populate([
-        //     {
-        //         path: 'workspaces', model: 'Workspace',
-        //         populate: {
-        //             path: 'teams', model: "Team",
-        //             populate: { path: 'members', model: 'User' }
-        //         }
-        //     }]))?.toJSON();
+
 
         console.log('found: ', found);
         if (!found) throw new UnauthorizedException('Invalid email or password');
@@ -120,11 +125,23 @@ export class AccountService {
         console.log('found user: ', found._id);
         // usr name and password is valid
         const userWithWorkspace = (await this.getUserWithWorkspaces(found.id)).toJSON();
+
         console.log('user with workspaces: ', userWithWorkspace);
         const { workspaces, password, ...payload } = userWithWorkspace;
+        const publicChannelsPromises = workspaces.map(async (workspace: any) => {
+            console.log('workspace name:', workspace.id);
+            const publicChannels = await this.getPublicChannelsInWorkspace(workspace.id);
+            console.log('public channels: ', publicChannels);
+            return {
+                publicChannels,
+                ...workspace
+            };
+        });
+        const workspacesWithPublicChannels = await Promise.all(publicChannelsPromises);
+
         return {
             access_token: this.jwtService.sign(payload),
-            user: { ...payload, workspaces },
+            user: { ...payload, workspaces: workspacesWithPublicChannels },
         };
     }
     async getUserWithWorkspaces(userId: string) {
@@ -145,6 +162,16 @@ export class AccountService {
                 populate: {
                     path: 'members'
                 }
+            }).populate({
+                path: 'workspaces',
+                populate: {
+                    path: 'teams',
+                    match: { members: userId }, // Filter teams where the user is a member
+                    populate: {
+                        path: 'members',
+
+                    },
+                },
             });
 
     }

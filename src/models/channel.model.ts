@@ -18,6 +18,7 @@ export class Channel extends BaseModel {
     @Prop() name: string;
     @Prop({ type: Types.ObjectId, ref: "Workspace" }) workspaceId: Types.ObjectId;
     @Prop() description: string;
+    @Prop() is_public: boolean;
     @Prop({ type: Types.ObjectId, ref: "Team" }) teamId: Types.ObjectId;
     @Prop({ type: [Types.ObjectId], ref: 'User' }) members: string[];
 }
