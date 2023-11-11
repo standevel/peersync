@@ -126,12 +126,12 @@ export class AccountService {
         // usr name and password is valid
         const userWithWorkspace = (await this.getUserWithWorkspaces(found.id)).toJSON();
 
-        console.log('user with workspaces: ', userWithWorkspace);
+        // console.log('user with workspaces: ', userWithWorkspace);
         const { workspaces, password, ...payload } = userWithWorkspace;
         const publicChannelsPromises = workspaces.map(async (workspace: any) => {
-            console.log('workspace name:', workspace.id);
+            // console.log('workspace name:', workspace.id);
             const publicChannels = await this.getPublicChannelsInWorkspace(workspace.id);
-            console.log('public channels: ', publicChannels);
+            // console.log('public channels: ', publicChannels);
             return {
                 publicChannels,
                 ...workspace

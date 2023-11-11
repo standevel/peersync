@@ -1,3 +1,5 @@
+import { ChatGateway } from './chat/chat.gateway';
+import { ChatModule } from './chat/chat.module';
 
 /* eslint-disable prettier/prettier */
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
@@ -16,6 +18,7 @@ import { NotificationModule } from './notification/notification.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 @Module({
   imports: [
+    ChatModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [config],
@@ -35,6 +38,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
   ],
   controllers: [AppController],
   providers: [
+
     AppService,
     {
       provide: APP_GUARD,
