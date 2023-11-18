@@ -30,7 +30,7 @@ import { InvitationService } from './services/invitation.service';
         },
         options: {
             partials: {
-                dir: join(process.env.PWD, 'templates/partials'),
+                dir: join(__dirname, 'templates/partials'),
                 options: {
                     strict: true,
                 },
