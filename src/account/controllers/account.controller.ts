@@ -74,5 +74,8 @@ export class AccountController {
         return this.accountService.acceptSuccess(token, personalData);
         // console.log('respose: ', response);
     }
-
+    @Get('user-details')
+    getUserDetails(string, @GetUser() user: UserDto) {
+        return this.accountService.getUserDetails(user.id);
+    }
 }

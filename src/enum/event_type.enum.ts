@@ -6,3 +6,8 @@ export enum EventType {
     MAKE_CHANNEL_ADMIN = 'MAKE_CHANNEL_ADMIN',
     MAKE_TEAM_ADMIN = 'MAKE_TEAM_ADMIN'
 }
+
+export class EventPayloadDto {
+    type: EventType;
+    data: any;
+}
