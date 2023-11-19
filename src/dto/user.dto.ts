@@ -7,6 +7,7 @@ import {
     IsOptional,
     IsString,
 } from 'class-validator';
+import { WorkspaceDto } from './workspace.dto';
 export class UserDto {
     @IsString()
     @IsOptional() name: string;
@@ -30,6 +31,8 @@ export class UserDto {
     @IsOptional() roles: string[];
     @IsString()
     @IsOptional() id?: string;
+    @IsString()
+    @IsOptional() activeWorkspace?: string | WorkspaceDto;
 
 }
 

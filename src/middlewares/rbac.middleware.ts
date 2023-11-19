@@ -15,7 +15,7 @@ export class RbacMiddleware implements NestMiddleware {
     const requiredRoles = handlerRoles || methodRoles;
 
     // Fetch user roles from token or session
-    const userRoles = req.user['roles'] || [];
+    const userRoles = req['user']['roles'] || [];
 
     const hasAccess = userRoles.some(role => requiredRoles.includes(role));
 

@@ -115,8 +115,6 @@ export class AccountService {
         const found =
             (await this.userModel.findOne({ email: signinDto.email }))?.toJSON();
 
-
-
         console.log('found: ', found);
         if (!found) throw new UnauthorizedException('Invalid email or password');
         const isMatch = bcrypt.compareSync(signinDto.password, found.password);
@@ -124,7 +122,15 @@ export class AccountService {
 
         console.log('found user: ', found._id);
         // usr name and password is valid
-        const userWithWorkspace = (await this.getUserWithWorkspaces(found.id)).toJSON();
+        const { workspaces, password, ...payload } = found;
+        return {
+            access_token: this.jwtService.sign(payload),
+            user: payload
+        };
+    }
+    async getUserDetails(userId: string) {
+        console.log('getting workspaces: ', userId);
+        const userWithWorkspace = (await this.getUserWithWorkspaces(userId)).toJSON();
 
         // console.log('user with workspaces: ', userWithWorkspace);
         const { workspaces, password, ...payload } = userWithWorkspace;
@@ -137,12 +143,10 @@ export class AccountService {
                 ...workspace
             };
         });
-        const workspacesWithPublicChannels = await Promise.all(publicChannelsPromises);
 
-        return {
-            access_token: this.jwtService.sign(payload),
-            user: { ...payload, workspaces: workspacesWithPublicChannels },
-        };
+        const workspacesWithPublicChannels = await Promise.all(publicChannelsPromises);
+        console.log('workspaces: ', workspacesWithPublicChannels);
+        return { ...payload, workspaces: workspacesWithPublicChannels };
     }
     async getUserWithWorkspaces(userId: string) {
         return await this.userModel

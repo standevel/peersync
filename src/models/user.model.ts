@@ -12,6 +12,7 @@ export interface IUser {
     phone: string;
     phone_is_verified: string;
     email_is_verified: string;
+    activeWorkspace: string;
 }
 
 export type UserDocument = HydratedDocument<User>;
@@ -19,8 +20,8 @@ export type UserDocument = HydratedDocument<User>;
 @Schema({ timestamps: true })
 export class User {
     @Prop() name: string;
-    @Prop()firstName:string;
-    @Prop()lastName:string;
+    @Prop() firstName: string;
+    @Prop() lastName: string;
     @Prop({ unique: true }) email: string;
     @Prop() password: string;
     @Prop() avatar: string;
@@ -31,6 +32,7 @@ export class User {
     @Prop() isPhoneVerified?: boolean;
     @Prop() isEmailVerified?: boolean;
     @Prop() emailVerificationToken: string;
+    @Prop({ type: Types.ObjectId, ref: 'Workspace' }) activeWorkspace: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
