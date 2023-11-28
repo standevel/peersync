@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { SignInDto, UserDto } from 'src/dto';
 import { ChannelDto } from 'src/dto/channel.dto';
 import { UserRole } from 'src/enum/user-roles.enum';
@@ -132,7 +132,7 @@ export class AccountService {
         console.log('getting workspaces: ', userId);
         const userWithWorkspace = (await this.getUserWithWorkspaces(userId)).toJSON();
 
-        // console.log('user with workspaces: ', userWithWorkspace);
+        console.log('user with workspaces: ', userWithWorkspace);
         const { workspaces, password, ...payload } = userWithWorkspace;
         const publicChannelsPromises = workspaces.map(async (workspace: any) => {
             // console.log('workspace name:', workspace.id);
@@ -146,7 +146,7 @@ export class AccountService {
 
         const workspacesWithPublicChannels = await Promise.all(publicChannelsPromises);
         console.log('workspaces: ', workspacesWithPublicChannels);
-        return { ...payload, workspaces: workspacesWithPublicChannels };
+        return { workspaces: workspacesWithPublicChannels };
     }
     async getUserWithWorkspaces(userId: string) {
         return await this.userModel
@@ -155,25 +155,36 @@ export class AccountService {
                 path: 'workspaces',
                 populate: {
                     path: 'teams',
-                    match: { members: userId }, // Filter teams where the user is a member
+                    model: 'Team',
+                    match: { members: new Types.ObjectId(userId) }, // Filter teams where the user is a member
                     populate: {
                         path: 'channels',
-                        match: { members: userId }, // Filter channels where the user is a member
+                        model: 'Channel',
+                        match: { members: new Types.ObjectId(userId) }, // Filter channels where the user is a member
+                        populate: {
+                            path: 'members',
+                            model: 'User',
+                            select: '-password'
+                        }
                     },
                 },
             }).populate({
                 path: 'workspaces',
                 populate: {
-                    path: 'members'
+                    path: 'members',
+                    model: 'User',
+                    select: '-password'
                 }
             }).populate({
                 path: 'workspaces',
                 populate: {
                     path: 'teams',
-                    match: { members: userId }, // Filter teams where the user is a member
+                    model: 'Team',
+                    match: { members: new Types.ObjectId(userId) }, // Filter teams where the user is a member
                     populate: {
                         path: 'members',
-
+                        model: 'User',
+                        select: '-password'
                     },
                 },
             });
