@@ -34,6 +34,9 @@ export class UserDto {
     @IsString()
     @IsOptional() activeWorkspace?: string | WorkspaceDto;
 
+    @IsString()
+    @IsOptional() profileImageUrl?: string;
+
 }
 
 export class UpdateUserDto extends PartialType(UserDto) { }

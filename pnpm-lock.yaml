@@ -89,6 +89,9 @@ dependencies:
   npm:
     specifier: ^10.2.1
     version: 10.2.4
+  passport:
+    specifier: ^0.6.0
+    version: 0.6.0
   passport-jwt:
     specifier: ^4.0.1
     version: 4.0.1

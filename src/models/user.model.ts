@@ -33,6 +33,8 @@ export class User {
     @Prop() isEmailVerified?: boolean;
     @Prop() emailVerificationToken: string;
     @Prop({ type: Types.ObjectId, ref: 'Workspace' }) activeWorkspace: string;
+    @Prop() profileImageUrl: string;
+    @Prop({ type: [Types.ObjectId], ref: 'Team' }) teams: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
