@@ -25,18 +25,34 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     @SubscribeMessage(EVENT)
     handleEvent(@MessageBody() payload: EventPayloadDto, @ConnectedSocket() socket: Socket) {
         // this.server.emit('events', data);
-        console.log('new message: ', payload);
+        console.log('event payload: ', payload);
         switch (payload.type) {
             case EventType.JOIN_CHANNEL:
                 this.joinChannel(socket, payload.data);
                 break;
             case EventType.JOIN_CHANNELS:
                 this.joinChannels(socket, payload.data);
+                break;
             case EventType.NEW_MESSAGE:
                 this.handleMessage(socket, payload.data);
                 break;
+            case EventType.GET_CHANNEL_MESSAGES:
+                this.getChannelMessages(socket, payload.data);
+                break;
             default:
                 break;
+        }
+    }
+    async getChannelMessages(socket: Socket, params: { channelId: string, page: number, pageSize: number; }) {
+        try {
+            const messages = await this.messageService.getChannelMessage(params.channelId, params.page, params.pageSize);
+            const payload = new EventPayloadDto();
+            payload.type = EventType.GET_CHANNEL_MESSAGES,
+                payload.data = messages;
+            console.log('channel messages: ', payload);
+            this.server.to(params.channelId).emit(EVENT, payload);
+        } catch (error) {
+            console.log('Error getting channel messages: ', error);
         }
     }
     joinChannels(socket: Socket, channels: string[]) {
@@ -47,6 +63,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         setTimeout(() => {
             console.log('socket rooms: ', socket.rooms);
         }, 1000);
+        const payload = new EventPayloadDto();
+        payload.type = EventType.READ_STATUS;
+        payload.data = 'confirming connection with backend';
+        socket.emit(EVENT, payload);
     }
     joinChannel(socket, data: any) {
         console.log(' join channel data: ', data);
@@ -60,6 +80,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
             this.addUserSocket(client, query.userId.toString(),);
         }
         console.log('online users: ', this.users);
+        const payload = new EventPayloadDto();
+        payload.type = EventType.READ_STATUS;
+        payload.data = 'confirming connection with backend';
+        client.emit(EVENT, payload);
     }
 
     handleDisconnect(client: Socket) {
@@ -76,23 +100,27 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
             }
         }
     }
-    async handleMessage(socket, message: MessageDto) {
-        console.log('message: ', message);
-        const payload = {
-            type: EventType.NEW_MESSAGE,
-            data: message
-        };
-        if (message.isPrivate) {
-            var userSocketIds = this.getUserSocketIds(message.receiver['id']);
+    async handleMessage(socket: Socket, message: MessageDto) {
+        try {
+            console.log('message: ', message);
+            const payload = {
+                type: EventType.NEW_MESSAGE,
+                data: message
+            };
+            if (message.isPrivate) {
+                var userSocketIds = this.getUserSocketIds(message.receiver['id']);
 
-            this.server.to(userSocketIds).emit(EVENT, payload);
+                this.server.to(userSocketIds).emit(EVENT, payload);
 
-        } else {
-            this.server.to(message.channel['id']).emit(EVENT, payload);
+            } else {
+                this.server.to(message.channel['id']).emit(EVENT, payload);
+            }
+
+            const savedMsg = await this.messageService.createMessage(message);
+            console.log('saved message: ', savedMsg);
+        } catch (error) {
+            console.log('Error creating message');
         }
-
-        const savedMsg = await this.messageService.createMessage(message);
-        console.log('saved message: ', savedMsg);
     }
     getUserSocketIds(userId: string) {
         const sockets = this.users.get(userId);

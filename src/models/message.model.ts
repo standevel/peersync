@@ -16,6 +16,7 @@ export class Message {
     @Prop() ractions: MessageReaction[];
     @Prop({ type: [Types.ObjectId] }) mentions: string[];
     @Prop({ type: [Types.ObjectId] }) readBy: string[];
+    @Prop() isPrivate: boolean;
 }
 
 
