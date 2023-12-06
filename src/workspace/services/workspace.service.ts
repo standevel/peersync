@@ -16,6 +16,8 @@ import { TeamService } from './team.service';
 @Injectable()
 export class WorkspaceService {
 
+
+
     constructor(
         @InjectModel(Workspace.name)
         private readonly workspaceModel: Model<WorkspaceDto>,
@@ -24,6 +26,40 @@ export class WorkspaceService {
         private userService: UserService,
         private notificationService: NotificationService
     ) { }
+    async getUserChannels(userId: string) {
+        const user = await this.userService.findById(userId);
+        return await this.channelService.findAllInWorkspace(user?.activeWorkspace?.toString());
+
+    }
+    async changeActiveWorkspace(data: { workspaceId: string, userId: string; }) {
+        try {
+            const workspace = this.checkWorkspaceExist(data.workspaceId);
+            if (workspace) {
+                const channels = await this.channelService.findAllInWorkspace(data.workspaceId);
+                await this.userService.changeActiveWorkspace(data.workspaceId, data.userId);
+
+                return channels.map(channel => channel.id);
+            }
+            return null;
+        } catch (error) {
+            console.log('error changing active workspace ', error);
+        }
+
+    }
+    async checkWorkspaceExist(workspaceId: string) {
+        return await this.workspaceModel.findOne({ _id: workspaceId });
+    }
+    async findOne(workspaceId: string) {
+        const found = await this.workspaceModel.findOne({ _id: workspaceId }).populate({
+            path: 'teams',
+            model: 'Team',
+            populate: {
+                path: 'channels',
+                model: 'Channel'
+            }
+        });
+        return found;
+    }
     async InviteTeammate(teammates: string[], user: UserDto, workspace: string, workspaceId: string) {
 
         const name = user.firstName ? user.firstName + " " + user.lastName : user.name;

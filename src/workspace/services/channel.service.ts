@@ -5,7 +5,7 @@ https://docs.nestjs.com/providers#services
 
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { UserDto } from 'src/dto';
 import { ChannelDto, UpdateChannelDto } from 'src/dto/channel.dto';
 import { Channel } from 'src/models';
@@ -13,8 +13,11 @@ import { TeamService } from 'src/workspace/services/team.service';
 
 @Injectable()
 export class ChannelService {
-    constructor(@InjectModel(Channel.name) private readonly channelModel: Model<ChannelDto>, private teamService: TeamService) { }
 
+    constructor(@InjectModel(Channel.name) private readonly channelModel: Model<ChannelDto>, private teamService: TeamService) { }
+    async findAllInWorkspace(workspaceId: string) {
+        return await this.channelModel.find({ workspaceId: new Types.ObjectId(workspaceId) });
+    }
     async updateChannel(channel: UpdateChannelDto, channelId: string) {
         try {
             if (!channelId) throw new BadRequestException('Channel id is required to update channel data');

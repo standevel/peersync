@@ -1,4 +1,4 @@
-import { IsArray, IsJSON, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsJSON, IsObject, IsOptional, IsString } from 'class-validator';
 import { MessageFile } from 'src/models/message_file';
 import { MessageReaction } from 'src/models/message_reaction';
 import { UserDto } from './user.dto';
@@ -18,13 +18,18 @@ export class MessageDto {
     @IsOptional() files: MessageFile[];
 
     @IsObject()
-    @IsOptional() ractions: MessageReaction[];
+    @IsOptional() reactions: MessageReaction[];
 
     @IsArray()
     @IsOptional() mentions: string[];
 
     @IsArray()
     @IsOptional() readBy: string[];
-    @IsString()
+
+    @IsBoolean()
     isPrivate: boolean;
+
+    @IsString()
+    @IsOptional() id?: string;
+
 }

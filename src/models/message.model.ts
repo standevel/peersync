@@ -13,7 +13,7 @@ export class Message {
     @Prop({ type: Types.ObjectId, ref: 'Channel' }) channel: string;
     @Prop({ type: Types.ObjectId, ref: 'User' }) sender: string;
     @Prop() files: MessageFile[];
-    @Prop() ractions: MessageReaction[];
+    @Prop() reactions: MessageReaction[];
     @Prop({ type: [Types.ObjectId] }) mentions: string[];
     @Prop({ type: [Types.ObjectId] }) readBy: string[];
     @Prop() isPrivate: boolean;

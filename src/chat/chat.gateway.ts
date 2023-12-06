@@ -8,6 +8,7 @@ import { Server, Socket } from 'socket.io';
 import { MessageDto } from 'src/dto/message.dto';
 import { EVENT, EventPayloadDto, EventType } from 'src/enum/event_type.enum';
 import { MessageService } from 'src/message/services/message.service';
+import { WorkspaceService } from 'src/workspace/services/workspace.service';
 // import {Socket} from '@nestjs/platform-socket.io';
 @WebSocketGateway({
     namespace: 'chat',
@@ -16,7 +17,8 @@ import { MessageService } from 'src/message/services/message.service';
     },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
-    constructor(private messageService: MessageService) { }
+    constructor(private messageService: MessageService,
+        private workspaceService: WorkspaceService) { }
     @WebSocketServer()
     server: Server;
 
@@ -39,8 +41,46 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
             case EventType.GET_CHANNEL_MESSAGES:
                 this.getChannelMessages(socket, payload.data);
                 break;
+            case EventType.ADD_REACTION:
+                this.handleReaction(socket, payload);
+                break;
+            case EventType.CHANGE_ACTIVE_WORKSPACE:
+                this.changeActiveWorkspace(socket, payload);
             default:
                 break;
+        }
+    }
+
+    async changeActiveWorkspace(socket: Socket, payload: EventPayloadDto) {
+        console.log('change active workspace: ', payload);
+        const channelIds = await this.workspaceService.changeActiveWorkspace(payload.data);
+        if (channelIds) {
+            channelIds.map(id => socket.join(id));
+        }
+    }
+    async handleReaction(socket: Socket, payload: EventPayloadDto) {
+        try {
+            const updatedMessage = await this.messageService.addReaction(payload.data.message, payload.data.reaction);
+            console.log('updated message: ', updatedMessage);
+            payload = { ...payload, data: updatedMessage };
+            if (payload.data?.message?.receiver) {
+                const userSockets = this.getUserSocketIds(payload.data.message.receiver);
+                const senderSockets = this.getUserSocketIds(payload.data.message.sender.id);
+                let sockets = [];
+                if (senderSockets?.length) {
+                    sockets.push(...senderSockets);
+                }
+                if (userSockets?.length) {
+                    sockets.push(...userSockets);
+                }
+
+                this.server.to(sockets).emit(EVENT, payload);
+            } else {
+                console.log('channel: ', payload.data.channel);
+                this.server.to(updatedMessage.channel['id'].toString()).emit(EVENT, payload);
+            }
+        } catch (error) {
+            console.log('error adding reactions: ', error);
         }
     }
     async getChannelMessages(socket: Socket, params: { channelId: string, page: number, pageSize: number; }) {
@@ -49,10 +89,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
             const payload = new EventPayloadDto();
             payload.type = EventType.GET_CHANNEL_MESSAGES,
                 payload.data = messages;
-            console.log('channel messages: ', payload);
+            // console.log('channel messages: ', payload);
             this.server.to(params.channelId).emit(EVENT, payload);
         } catch (error) {
-            console.log('Error getting channel messages: ', error);
+            console.log('Error getting channel messages: ', error.message);
         }
     }
     joinChannels(socket: Socket, channels: string[]) {
@@ -68,7 +108,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         payload.data = 'confirming connection with backend';
         socket.emit(EVENT, payload);
     }
-    joinChannel(socket, data: any) {
+    joinChannel(socket: Socket, data: any) {
         console.log(' join channel data: ', data);
     }
 
@@ -78,6 +118,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         console.log('query: ', query);
         if (query.userId) {
             this.addUserSocket(client, query.userId.toString(),);
+            this.workspaceService.getUserChannels(query.userId.toString()).then(channels => {
+                console.log('found channels: ', channels);
+                channels.map((channel) => {
+                    client.join(channel.id);
+                    console.log('client rooms: ', client.rooms);
+                });
+
+            });
         }
         console.log('online users: ', this.users);
         const payload = new EventPayloadDto();
@@ -93,7 +141,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
             const index = values.indexOf(client);
             if (index !== -1) {
                 values.splice(index, 1);
-
                 if (values.length === 0) {
                     this.users.delete(key);
                 }

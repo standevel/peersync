@@ -11,10 +11,18 @@ import { User } from 'src/models';
 
 @Injectable()
 export class UserService {
+
+
+    constructor(@InjectModel(User.name) private userModel: Model<UserDto>) { }
+    async changeActiveWorkspace(workspaceId: string, userId: string) {
+        return await this.userModel.updateOne({ _id: userId }, { activeWorkspace: workspaceId });
+    }
+    async findById(userId: string) {
+        return await this.userModel.findById(userId);
+    }
     acceptSuccess(personalData: UpdateUserDto) {
         throw new Error('Method not implemented.');
     }
-    constructor(@InjectModel(User.name) private userModel: Model<UserDto>) { }
     async addWorkspaceToUser(userId: Types.ObjectId | string, workspaceId: Types.ObjectId | string) {
         const upRes = await this.userModel.updateOne(
             { _id: userId },

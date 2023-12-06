@@ -3,9 +3,37 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { MessageDto } from 'src/dto/message.dto';
 import { Message } from 'src/models';
+import { MessageReaction } from 'src/models/message_reaction';
 
 @Injectable()
 export class MessageService {
+    async addReaction(message: MessageDto, reaction: MessageReaction) {
+        console.log('message and reaction: ', message.id, reaction);
+        const found = await this.chatModel.findOne({ '_id': message.id },);
+        console.log('found: ', found);
+        if (found.reactions) found.reactions.push(reaction);
+        else found.reactions = [reaction];
+        (await found.save()).toJSON();
+        //   await found.populate({
+        //     path:'sender',
+        //     model:'User',
+        //     select:'-password'
+        // })
+        const populated = await this.chatModel.populate(found, [{
+            path: 'sender',
+            model: 'User',
+            select: '-password'
+        },
+        {
+            path: 'receiver',
+            model: 'User',
+            select: '-password'
+        }, {
+            path: 'channel',
+            model: 'Channel',
+        }]);
+        return populated.toJSON() as MessageDto;
+    }
 
     constructor(@InjectModel(Message.name) private chatModel: Model<Message>) { }
     async getChannelMessage(channelId: string, page: number, pageSize: number) {

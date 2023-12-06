@@ -28,5 +28,6 @@ import { ChannelService } from './services/channel.service';
     ],
     controllers: [WorkspaceController, TeamController, ChannelController],
     providers: [WorkspaceService, TeamService, ChannelService],
+    exports: [WorkspaceService, ChannelService]
 })
 export class WorkspaceModule { }
