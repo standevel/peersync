@@ -3,7 +3,7 @@
 https://docs.nestjs.com/controllers#controllers
 */
 
-import { Body, Controller, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { GetUser } from 'src/decorators/get-user.decorator';
 import { UserDto } from 'src/dto';
 import { ChannelDto, UpdateChannelDto } from 'src/dto/channel.dto';
@@ -20,5 +20,9 @@ export class ChannelController {
     @Put('/:channelId')
     updateChannel(@Body() channel: UpdateChannelDto, @Param('channelId') channelId: string) {
         return this.channelService.updateChannel(channel, channelId);
+    }
+    @Get('user-channels')
+    getUserChannels(@Param('userId') userId: string) {
+        return this.channelService.getUserChannels(userId);
     }
 }

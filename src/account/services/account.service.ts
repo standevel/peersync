@@ -18,6 +18,9 @@ import { InvitationService } from 'src/notification/services/invitation.service'
 import { UpdateUserDto } from '../../dto/user.dto';
 import { NotificationService } from '../../notification/services/notification.service';
 import { TokenGeneratorService } from '../../notification/services/token_generator.service';
+import { MessageService } from 'src/message/services/message.service';
+import { ChannelService } from 'src/workspace/services/channel.service';
+import { WorkspaceService } from 'src/workspace/services/workspace.service';
 
 @Injectable()
 export class AccountService {
@@ -32,18 +35,24 @@ export class AccountService {
         private configService: ConfigService,
         private tokenGeneratorService: TokenGeneratorService,
         private invitationService: InvitationService,
+        private messageService: MessageService,
         // private channelService:ChannelService
     ) { } async getAllUsers() {
         return await this.userModel.find();
     }
 
-    async getPublicChannelsInWorkspace(workspaceId: string) {
+    async getPublicChannelsInWorkspace(workspaceId: string, userId: string) {
         console.log('workspaceId ', workspaceId.toString());
         const channels = await this.channelModel.find(
             { "workspaceId": workspaceId, "teamId": null }
         );
         // console.log('found channels:', channels);
-        return channels;
+        const formattedChannels = [];
+        for (let i = 0; i < channels.length; i++) {
+            const newMessages = await this.messageService.findNewChannelMessages(channels[i].id, userId);
+            formattedChannels.push({ ...channels[i].toJSON(), newMessages: 1 });
+        }
+        return formattedChannels;
     }
 
     async acceptInvite(token: string) {
@@ -129,24 +138,31 @@ export class AccountService {
         };
     }
     async getUserDetails(userId: string) {
-        console.log('getting workspaces: ', userId);
-        const userWithWorkspace = (await this.getUserWithWorkspaces(userId)).toJSON();
+        let user = await (await this.userModel.findOne({ _id: userId })).populate([
+            {
+                path: 'workspaces',
+                model: 'Workspace',
+                populate: {
+                    path: 'members',
+                    model: 'User',
+                    select: '-password'
+                }
+            },
 
-        console.log('user with workspaces: ', userWithWorkspace);
-        const { workspaces, password, ...payload } = userWithWorkspace;
-        const publicChannelsPromises = workspaces.map(async (workspace: any) => {
-            // console.log('workspace name:', workspace.id);
-            const publicChannels = await this.getPublicChannelsInWorkspace(workspace.id);
-            // console.log('public channels: ', publicChannels);
-            return {
-                publicChannels,
-                ...workspace
-            };
-        });
+            {
+                path: 'activeWorkspace',
+                model: 'Workspace'
+            }
+        ]);
 
-        const workspacesWithPublicChannels = await Promise.all(publicChannelsPromises);
-        console.log('workspaces: ', workspacesWithPublicChannels);
-        return { workspaces: workspacesWithPublicChannels };
+        // user = user.toJSON();
+        // for (let i = 0; i < user.workspaces.length; i++) {
+        //     const channels = this.channelService.findAllInWorkspace((user.workspaces[i] as any)['id'], userId);
+        //     console.log('workspace channels: ', channels);
+        //     user.workspaces[i]['channels'] = channels;
+        // }
+        // console.log('final user data: ', user);
+        return user.toJSON();
     }
     async getUserWithWorkspaces(userId: string) {
         return await this.userModel
@@ -160,6 +176,7 @@ export class AccountService {
                     populate: {
                         path: 'channels',
                         model: 'Channel',
+
                         match: { members: new Types.ObjectId(userId) }, // Filter channels where the user is a member
                         populate: {
                             path: 'members',

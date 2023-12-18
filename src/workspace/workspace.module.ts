@@ -15,11 +15,13 @@ import { TeamController } from './controllers/team.controller';
 import { TeamService } from './services/team.service';
 import { ChannelController } from './controllers/channel.controller';
 import { ChannelService } from './services/channel.service';
+import { MessageModule } from 'src/message/message.module';
 
 @Module({
     imports: [
         CompanyModule, AccountModule,
         NotificationModule,
+        MessageModule,
         MongooseModule.forFeature([
             { name: Workspace.name, schema: WorkspaceSchema },
             { name: Team.name, schema: TeamSchema },

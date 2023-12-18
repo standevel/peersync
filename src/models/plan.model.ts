@@ -6,7 +6,7 @@ export interface ISubscription {
     price: string;
     features: string[];
     description: string;
-    constraint: Array<{ name: string; max_users: number; max_duration: number }>;
+    constraint: Array<{ name: string; max_users: number; max_duration: number; }>;
 }
 
 export type SubscriptionDocument = HydratedDocument<Subscription>;
@@ -24,7 +24,7 @@ export class Subscription {
             max_duration: Number,
         }),
     )
-    constraint: Array<{ name: string; max_users: number; max_duration: number }>;
+    constraint: Array<{ name: string; max_users: number; max_duration: number; }>;
 }
 
 export const SubscriptionSchema = SchemaFactory.createForClass(Subscription);

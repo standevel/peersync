@@ -3,7 +3,7 @@
 https://docs.nestjs.com/controllers#controllers
 */
 
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { GetUser } from 'src/decorators/get-user.decorator';
 import { CreateWorkspaceDto, UserDto } from 'src/dto';
 
@@ -29,5 +29,9 @@ export class WorkspaceController {
     @Post('invite-teammate')
     inviteTeammate(@Body() data: { teammates: string[]; workspace: string; workspaceId: string; }, @GetUser() user: UserDto) {
         return this.workspaceService.InviteTeammate(data.teammates, user, data.workspace, data.workspaceId);
+    }
+    @Get('user-workspaces')
+    getUserWorkspaces(@GetUser() user: UserDto) {
+        return this.workspaceService.getUserWorkspaces(user.id);
     }
 }

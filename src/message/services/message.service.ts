@@ -7,6 +7,11 @@ import { MessageReaction } from 'src/models/message_reaction';
 
 @Injectable()
 export class MessageService {
+    constructor(@InjectModel(Message.name) private chatModel: Model<Message>) { }
+
+    async findNewChannelMessages(id: string, userId) {
+        return await this.chatModel.countDocuments({ channel: id, views: { $ne: userId } });
+    }
     async addReaction(message: MessageDto, reaction: MessageReaction) {
         console.log('message and reaction: ', message.id, reaction);
         const found = await this.chatModel.findOne({ '_id': message.id },);
@@ -31,11 +36,14 @@ export class MessageService {
         }, {
             path: 'channel',
             model: 'Channel',
+            populate: {
+                path: 'members',
+                model: 'User',
+                select: '-password'
+            }
         }]);
         return populated.toJSON() as MessageDto;
     }
-
-    constructor(@InjectModel(Message.name) private chatModel: Model<Message>) { }
     async getChannelMessage(channelId: string, page: number, pageSize: number) {
         if (!channelId) throw new BadRequestException('you need channel id to get channel messages!');
 
@@ -55,18 +63,21 @@ export class MessageService {
                 select: '-members -teamId'
             });
         return messages;
-    } async createMessage(message: MessageDto) {
-
+    }
+    async createMessage(message: MessageDto) {
+        delete message.id;
         const newMsg = new this.chatModel({
             ...message, sender: message.sender ? new Types.ObjectId(message.sender['id']) : null,
             channel: message.channel ? new Types.ObjectId(message.channel['id']) : null,
             receiver: message.receiver ? new Types.ObjectId(message.receiver['id']) : null
         });
-        await newMsg.save();
-        return this.findOne(newMsg.id);
+        const saved = await newMsg.save();
+        console.log('SAVED: ', saved);
+        return this.findOne(saved.id);
     }
     async findOne(id: string) {
-        return await this.chatModel.findOne({ _id: id })
+        console.log('founding message with id: ', id);
+        const found = await this.chatModel.findOne({ _id: id })
             .populate({
                 path: 'sender',
                 model: 'User',
@@ -80,7 +91,12 @@ export class MessageService {
             .populate({
                 path: 'channel',
                 model: 'Channel',
-                select: '-members -teamId'
+                populate: {
+                    path: 'members',
+                    model: 'User',
+                    select: '-password'
+                }
             });
+        return found.toJSON();
     }
 }

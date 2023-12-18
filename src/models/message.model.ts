@@ -23,7 +23,7 @@ export class Message {
 
 export const MessageSchema = SchemaFactory.createForClass(Message);
 MessageSchema.set('toJSON', {
-    // virtuals: true
+    virtuals: true,
     transform: (doc, ret) => {
         ret.id = ret._id;
         delete ret._id;

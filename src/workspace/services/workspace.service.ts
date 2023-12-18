@@ -12,9 +12,12 @@ import { Workspace } from 'src/models';
 import { ChannelService } from 'src/workspace/services/channel.service';
 import { NotificationService } from '../../notification/services/notification.service';
 import { TeamService } from './team.service';
+import { MessageService } from 'src/message/services/message.service';
+import { AccountService } from 'src/account/services/account.service';
 
 @Injectable()
 export class WorkspaceService {
+
 
 
 
@@ -24,18 +27,28 @@ export class WorkspaceService {
         private teamService: TeamService,
         private channelService: ChannelService,
         private userService: UserService,
-        private notificationService: NotificationService
+        private notificationService: NotificationService,
+        private messageService: MessageService,
+        private accountService: AccountService
     ) { }
-    async getUserChannels(userId: string) {
-        const user = await this.userService.findById(userId);
-        return await this.channelService.findAllInWorkspace(user?.activeWorkspace?.toString());
+    async getUserWorkspaces(userId: string) {
+        let user = await this.accountService.getUserDetails(userId);
+        delete user.password;
+
+        for (let i = 0; i < user.workspaces.length; i++) {
+            const channels = await this.channelService.findAllInWorkspace((user.workspaces[i] as any)['id'], userId);
+            console.log('workspace channels: ', channels);
+            user.workspaces[i]['channels'] = channels;
+        }
+        console.log('final user data: ', user);
+        return user;
 
     }
     async changeActiveWorkspace(data: { workspaceId: string, userId: string; }) {
         try {
             const workspace = this.checkWorkspaceExist(data.workspaceId);
             if (workspace) {
-                const channels = await this.channelService.findAllInWorkspace(data.workspaceId);
+                const channels = await this.channelService.findAllInWorkspace(data.workspaceId, data.userId);
                 await this.userService.changeActiveWorkspace(data.workspaceId, data.userId);
 
                 return channels.map(channel => channel.id);
